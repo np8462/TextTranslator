@@ -1,4 +1,19 @@
 # TextTranslator
+C:\TextTranslator>corflags TextTranslator.exe
+Microsoft (R) .NET Framework CorFlags Conversion Tool.  Version  4.0.30319.17929
+
+Copyright (c) Microsoft Corporation.  All rights reserved.
+
+Version   : v4.0.30319
+CLR Header: 2.5
+PE        : PE32
+CorFlags  : 0x20003
+ILONLY    : 1
+32BITREQ  : 0
+32BITPREF : 1
+Signed    : 0
+
+این برنامه نیازمند دات نت فریمورک ورژن 4 است...
 
 # US English
 
