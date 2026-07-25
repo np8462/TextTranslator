@@ -4,7 +4,7 @@ C:\TextTranslator>corflags TextTranslator.exe
 Microsoft (R) .NET Framework CorFlags Conversion Tool.  Version  4.0.30319.17929
 این برنامه نیازمند دات نت فریمورک ورژن 4 است...
 
-# us English
+# English
 
 # Word Hover Translator
 
@@ -45,8 +45,13 @@ A lightweight Windows application that helps you quickly understand selected wor
 > این پروژه با هدف افزایش سرعت مطالعه و یادگیری واژگان طراحی شده است.
 
 سایر فایل ها:
+
 DicEck.exe
+
 PersianDate .exe & .js component...
+
 QrCode web component .dll
+
 Win. farsi component .dll
+
 GifViewer & Candle & butterfly...
