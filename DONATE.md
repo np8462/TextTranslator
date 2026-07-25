@@ -1,4 +1,4 @@
-❤️ Support NP Runtime Studio
+❤️ Support TextTranslator
 
 If TextTranslator saves your time,
 consider supporting future development.
