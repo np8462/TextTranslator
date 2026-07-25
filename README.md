@@ -1,5 +1,6 @@
 # TextTranslator
 C:\TextTranslator>corflags TextTranslator.exe
+
 Microsoft (R) .NET Framework CorFlags Conversion Tool.  Version  4.0.30319.17929
 
 Copyright (c) Microsoft Corporation.  All rights reserved.
