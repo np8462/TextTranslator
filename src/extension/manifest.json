@@ -1,17 +1,30 @@
 {
   "manifest_version": 3,
   "name": "TextTranslator",
-  "version": "0.2.0",
-  "description": "Select an English word on a webpage to see a Persian demo meaning.",
-  "permissions": ["storage"],
+  "version": "0.3.0",
+  "description": "English-Persian dictionary with offline lookup and configurable online translation.",
+  "permissions": [
+    "storage"
+  ],
+  "optional_host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "action": {
     "default_title": "TextTranslator",
     "default_popup": "popup.html"
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ]
