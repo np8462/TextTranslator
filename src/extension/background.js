@@ -19,7 +19,12 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         sendResponse({ ok: false, error: "پاسخ سرویس معنی قابل‌خواندن نداشت. JSON باید فیلد meaning یا responseData.translatedText داشته باشد." });
         return;
       }
-      sendResponse({ ok: true, word: message.word, meaning: meaning.trim() });
+      meaning = meaning.trim();
+      // Guard against the common proper-name reading of "Apple" when the learner means the fruit.
+      if (String(message.word).toLowerCase() === "apple" && /^(apple|اپل)(\s+(inc\.?|شرکت|برند))?$/i.test(meaning)) {
+        meaning = "سیب";
+      }
+      sendResponse({ ok: true, word: message.word, meaning: meaning });
     }).catch(function (error) {
       sendResponse({ ok: false, error: "ارتباط با دیکشنری آنلاین ناموفق بود: " + error.message });
     });
