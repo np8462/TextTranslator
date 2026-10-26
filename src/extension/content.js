@@ -73,7 +73,7 @@
     var top = rect.bottom + 8;
     if (top + card.offsetHeight > window.innerHeight - 8) top = rect.top - card.offsetHeight - 8;
     card.style.left = left + "px"; card.style.top = Math.max(8, top) + "px";
-    cardTimer = setTimeout(removeCard, displayDurationSeconds * 1000);
+    if (!isLoading) cardTimer = setTimeout(removeCard, displayDurationSeconds * 1000);
   }
   function isEditable(node) {
     if (!node) return false;
@@ -155,7 +155,7 @@
       if (card && !hideTimer) hideTimer = setTimeout(removeCard, 350);
       return;
     }
-    if (found.word === lastHoverWord && card) return;
+    if (found.word === lastHoverWord) return;
     lastHoverWord = found.word;
     hoverTimer = setTimeout(function () {
       hoverTimer = null;
