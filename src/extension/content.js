@@ -51,7 +51,7 @@
       customDictionaries["en-fa"] = data.customDictionary;
       chrome.storage.local.set({ customDictionaries: customDictionaries });
     }
-    rebuildDictionary();
+    loadPairDictionary();
   });
 
   function removeCard() {
