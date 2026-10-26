@@ -105,8 +105,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (sourceLanguage === "en" && targetLanguage === "fa") {
       Object.keys(baseOffline).forEach(function (key) { offline[key] = baseOffline[key]; });
     }
-    chrome.storage.local.get({ customDictionaries: {} }, function (saved) {
-      var pairWords = (saved.customDictionaries || {})[pairKey()] || {};
+    chrome.storage.local.get({ customDictionaries: {}, customDictionary: {} }, function (saved) {
+      var dictionaries = saved.customDictionaries || {};
+      if (!dictionaries["en-fa"] && saved.customDictionary && Object.keys(saved.customDictionary).length) {
+        dictionaries["en-fa"] = saved.customDictionary;
+        chrome.storage.local.set({ customDictionaries: dictionaries });
+      }
+      var pairWords = dictionaries[pairKey()] || {};
       Object.keys(pairWords).forEach(function (key) {
         if (typeof pairWords[key] === "string") offline[key.toLowerCase()] = pairWords[key];
       });
