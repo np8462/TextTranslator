@@ -1,6 +1,6 @@
 # TextTranslator Chrome Extension
 
-**Status:** Local prototype, version 0.4.0. Changes are limited to the test branch; this is not a published Chrome Web Store release.
+**Status:** Local prototype, version 0.5.0. Changes are limited to the test branch; this is not a published Chrome Web Store release.
 
 این افزونه می‌تواند هنگام بردن ماوس روی یک واژه یا انتخاب آن در صفحه، معنی آن را در یک کارت کوچک نشان دهد. حالت آنلاین/آفلاین و جفت‌زبان انتخاب‌شده در پنجرهٔ افزونه برای کلمات هایلایت‌شده نیز اعمال می‌شود.
 
@@ -8,12 +8,12 @@
 
 - Separate source and target language selectors: English, German, French, Spanish, Italian, Turkish, Arabic, Russian, Japanese, Simplified Chinese, and Persian.
 - Separate local saved dictionary for each language pair (for example, \`en-fa\` and \`de-fa\`).
-- The bundled base dictionary is currently English → Persian only.
+- Starter offline dictionaries are included for Persian ↔ English, German, French, Spanish, Italian, Turkish, Arabic, Russian, Japanese, and Simplified Chinese. Each pair is a separate key in `dictionaries.json`; user-added entries override starter meanings in Chrome local storage.
 - One online/offline toggle shared by popup lookup and highlighted-word lookup.
 - The default online endpoint is \`https://translate.googleapis.com/translate_a/single?client=gtx&sl={source}&tl={target}&dt=t&q={word}\`.
 - This endpoint is a public, unofficial Google Translate interface; it is not a documented, guaranteed Google Cloud Translation API and may change or stop working.
 - The official Google Cloud Translation API requires Google Cloud configuration/authentication and may incur charges.
-- After an online lookup, the **＋** button saves that word and meaning in Chrome local storage under the currently selected language pair.
+- After an online lookup, the **＋** button saves that word and meaning in Chrome local storage under the currently selected language pair. The popup lists the active dictionary and shows how many entries were added by the user. A configurable 1/2/3/5/8-second tooltip timer is available.
 - No build step or third-party package is required. Uses Manifest V3.
 
 ## Install locally
