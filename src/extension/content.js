@@ -106,17 +106,52 @@
     if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
     window.setTimeout(lookupSelection, 40);
   });
-  document.addEventListener("mousemove", function (event) {
-    if (!card) return;
-    var selection = window.getSelection(), overSelection = false;
-    if (selection && selection.rangeCount > 0 && !selection.isCollapsed) {
-      var selectedRect = selection.getRangeAt(0).getBoundingClientRect();
-      overSelection = event.clientX >= selectedRect.left && event.clientX <= selectedRect.right &&
-        event.clientY >= selectedRect.top && event.clientY <= selectedRect.bottom;
+  var hoverTimer = null;
+  var lastHoverWord = "";
+  function getWordAtPoint(x, y) {
+    var range = null;
+    if (document.caretRangeFromPoint) range = document.caretRangeFromPoint(x, y);
+    else if (document.caretPositionFromPoint) {
+      var pos = document.caretPositionFromPoint(x, y);
+      if (pos) { range = document.createRange(); range.setStart(pos.offsetNode, pos.offset); range.collapse(true); }
     }
-    if (overSelection || card.contains(event.target)) {
+    if (!range || !range.startContainer || range.startContainer.nodeType !== 3) return null;
+    if (isEditable(range.startContainer)) return null;
+    var node = range.startContainer, text = node.nodeValue || "", offset = range.startOffset;
+    if (!text.length) return null;
+    if (offset === text.length || (offset < text.length && !/[\p{L}\p{N}]/u.test(text.charAt(offset)))) offset--;
+    if (offset < 0 || !/[\p{L}\p{N}]/u.test(text.charAt(offset))) return null;
+    var start = offset, end = offset + 1;
+    while (start > 0 && /[\p{L}\p{N}'’_-]/u.test(text.charAt(start - 1))) start--;
+    while (end < text.length && /[\p{L}\p{N}'’_-]/u.test(text.charAt(end))) end++;
+    var word = text.slice(start, end);
+    if (!word || word.length > 40 || !/[\p{L}\p{N}]/u.test(word)) return null;
+    var wordRange = document.createRange();
+    wordRange.setStart(node, start); wordRange.setEnd(node, end);
+    var rect = wordRange.getBoundingClientRect();
+    if (!rect || (!rect.width && !rect.height)) return null;
+    return { word: word, rect: rect };
+  }
+  document.addEventListener("mousemove", function (event) {
+    if (card && card.contains(event.target)) {
       if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
-    } else if (!hideTimer) hideTimer = setTimeout(removeCard, 450);
+      return;
+    }
+    if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+    if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
+    var found = getWordAtPoint(event.clientX, event.clientY);
+    if (!found) {
+      lastHoverWord = "";
+      if (card && !hideTimer) hideTimer = setTimeout(removeCard, 350);
+      return;
+    }
+    if (found.word === lastHoverWord && card) return;
+    lastHoverWord = found.word;
+    hoverTimer = setTimeout(function () {
+      hoverTimer = null;
+      if (!enabled) return;
+      showSelectionMeaning(found.word, found.rect);
+    }, 180);
   });
   document.addEventListener("mousedown", function (event) { if (card && !card.contains(event.target)) removeCard(); });
   chrome.storage.onChanged.addListener(function (changes, areaName) {
