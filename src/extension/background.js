@@ -77,6 +77,7 @@ function performLookup(message, sendResponse) {
         return;
       }
       meaning = meaning.trim();
+      if (word.toLowerCase() === "apple" && source === "en" && target === "fa" && /^(apple|اپل)(\s+(inc\.?|شرکت|برند))?$/i.test(meaning)) meaning = "سیب";
       var cache = settings.onlineMeaningCache || {};
       cache[key] = { meaning: meaning, expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000 };
       chrome.storage.local.set({ onlineMeaningCache: cache, onlineCooldownUntil: 0 });
