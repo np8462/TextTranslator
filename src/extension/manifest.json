@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "TextTranslator",
-  "version": "0.3.0",
-  "description": "English-Persian dictionary with offline lookup and configurable online translation.",
+  "version": "0.4.0",
+  "description": "Multilingual dictionary with pair-specific offline storage and online highlighted-word lookup.",
   "permissions": [
     "storage"
   ],
@@ -37,5 +37,8 @@
         "<all_urls>"
       ]
     }
+  ],
+  "host_permissions": [
+    "https://translate.googleapis.com/*"
   ]
 }
