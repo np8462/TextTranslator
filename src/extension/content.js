@@ -46,7 +46,7 @@
     sourceLanguage = data.sourceLanguage || "en";
     targetLanguage = data.targetLanguage || "fa";
     customDictionaries = data.customDictionaries || {};
-    displayDurationSeconds = [1,2,3,5,8].indexOf(Number(data.tooltipDurationSeconds)) >= 0 ? Number(data.tooltipDurationSeconds) : 2;
+    displayDurationSeconds = Number(data.tooltipDurationSeconds) >= 1 && Number(data.tooltipDurationSeconds) <= 60 ? Math.floor(Number(data.tooltipDurationSeconds)) : 2;
     if (!customDictionaries["en-fa"] && data.customDictionary && Object.keys(data.customDictionary).length) {
       customDictionaries["en-fa"] = data.customDictionary;
       chrome.storage.local.set({ customDictionaries: customDictionaries });
@@ -177,7 +177,7 @@
       if (!enabled) removeCard();
     }
     if (changes.dictionaryMode) dictionaryMode = changes.dictionaryMode.newValue === "offline" ? "offline" : "online";
-    if (changes.tooltipDurationSeconds) displayDurationSeconds = [1,2,3,5,8].indexOf(Number(changes.tooltipDurationSeconds.newValue)) >= 0 ? Number(changes.tooltipDurationSeconds.newValue) : 2;
+    if (changes.tooltipDurationSeconds) displayDurationSeconds = Number(changes.tooltipDurationSeconds.newValue) >= 1 && Number(changes.tooltipDurationSeconds.newValue) <= 60 ? Math.floor(Number(changes.tooltipDurationSeconds.newValue)) : 2;
     if (changes.sourceLanguage) sourceLanguage = changes.sourceLanguage.newValue || "en";
     if (changes.targetLanguage) targetLanguage = changes.targetLanguage.newValue || "fa";
     if (changes.customDictionaries) customDictionaries = changes.customDictionaries.newValue || {};
