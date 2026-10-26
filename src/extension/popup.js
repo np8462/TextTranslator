@@ -61,15 +61,21 @@ document.addEventListener("DOMContentLoaded", function () {
   chrome.storage.local.get({ textTranslatorEnabled: true, onlineDictionaryUrl: DEFAULT_URL, customDictionary: {} }, function (data) {
     render(data.textTranslatorEnabled !== false);
     endpoint.value = data.onlineDictionaryUrl || DEFAULT_URL;
-    chrome.storage.local.get(null, function () {});
   });
 
   fetch(chrome.runtime.getURL("dictionary.json")).then(function (r) { return r.json(); }).then(function (data) {
     offline = data || {};
-  }).catch(function () {});
-
-  chrome.storage.local.get({ customDictionary: {} }, function (data) {
-    Object.keys(data.customDictionary || {}).forEach(function (key) { offline[key.toLowerCase()] = data.customDictionary[key]; });
+    chrome.storage.local.get({ customDictionary: {} }, function (saved) {
+      Object.keys(saved.customDictionary || {}).forEach(function (key) {
+        offline[key.toLowerCase()] = saved.customDictionary[key];
+      });
+    });
+  }).catch(function () {
+    chrome.storage.local.get({ customDictionary: {} }, function (saved) {
+      Object.keys(saved.customDictionary || {}).forEach(function (key) {
+        offline[key.toLowerCase()] = saved.customDictionary[key];
+      });
+    });
   });
 
   toggle.addEventListener("click", function () {
