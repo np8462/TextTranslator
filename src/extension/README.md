@@ -1,35 +1,43 @@
 # TextTranslator Chrome Extension
 
-**Status:** Initial project scaffold; the word-lookup feature is not implemented yet.
+**Status:** Local prototype, version 0.2.0. This is a test build, not a published Chrome Web Store release.
 
-این پوشه برای توسعه افزونه مستقل Google Chrome است و از برنامه قدیمی ویندوزی جدا نگه داشته می‌شود.
+این افزونهٔ آزمایشی مستقل از برنامهٔ قدیمی ویندوزی است. در این نسخه با انتخاب یک کلمهٔ انگلیسی، معنی فارسیِ چند واژهٔ نمونه در یک پنجرهٔ کوچک نمایش داده می‌شود.
 
 ## Compatibility
 
 - Target browser: Google Chrome 109 and later.
 - Uses Manifest V3.
-- No build step or third-party package is required for this initial scaffold.
+- No build step or third-party package is required.
+- Uses a small local demo dictionary; online lookup is not implemented yet.
 
 ## Install locally
 
-1. Download the repository, or use **Code → Download ZIP** on GitHub.
-2. In Chrome, open `chrome://extensions`.
-3. Turn on **Developer mode**.
-4. Choose **Load unpacked**.
-5. Select the `src/extension` folder (the folder containing `manifest.json`).
+1. Download the repository using Code → Download ZIP, then extract it.
+2. In Chrome, open chrome://extensions.
+3. Turn on Developer mode.
+4. Choose Load unpacked.
+5. Select the src/extension folder (the folder containing manifest.json).
+6. Open a regular webpage, select one English word, and inspect the small meaning card.
+7. Click the extension icon to enable or disable the feature.
 
-## Current state
+If the extension was already installed, press Reload on its card after replacing the files. Refresh webpages that were open before the extension was loaded.
 
-This commit creates the extension's starting structure only. Word selection, the meaning popup, online lookup, and an offline dictionary will be added and tested in later steps.
+## Notes
+
+- The prototype responds to a selected single English word. It does not yet translate sentences or support every word.
+- Some browser-internal pages, the Chrome Web Store, and restricted pages do not allow content scripts to run.
+- The old files in legacy-files/ are kept separate and are not modified by this prototype.
 
 ---
 
-## راهنمای نصب فارسی
+## راهنمای نصب و استفاده
 
-۱. مخزن را دانلود کنید یا از GitHub گزینه **Code → Download ZIP** را بزنید.  
-۲. در کروم آدرس `chrome://extensions` را باز کنید.  
-۳. گزینه **Developer mode** را فعال کنید.  
-۴. روی **Load unpacked** بزنید.  
-۵. پوشه `src/extension` را انتخاب کنید؛ همان پوشه‌ای که فایل `manifest.json` در آن قرار دارد.
+۱. از GitHub گزینهٔ Code → Download ZIP را بزنید و فایل را از حالت فشرده خارج کنید.
+۲. در Chrome آدرس chrome://extensions را باز کنید.
+۳. گزینهٔ Developer mode را فعال کنید.
+۴. روی Load unpacked بزنید و پوشهٔ src/extension را انتخاب کنید.
+۵. یک صفحهٔ وب معمولی را باز کنید و یک کلمهٔ انگلیسی را انتخاب کنید؛ پنجرهٔ کوچک معنی کنار آن ظاهر می‌شود.
+۶. از آیکون افزونه می‌توانید قابلیت را فعال یا خاموش کنید. اگر افزونه از قبل نصب بوده، ابتدا Reload را بزنید و سپس صفحهٔ وب را تازه‌سازی کنید.
 
-در این مرحله فقط ساختار اولیه افزونه ایجاد شده است. قابلیت انتخاب کلمه، نمایش معنی، جست‌وجوی آنلاین و واژه‌نامه آفلاین در مراحل بعدی پیاده‌سازی و آزمایش می‌شوند.
+این نسخه فقط یک واژه‌نامهٔ کوچک آفلاین برای آزمایش دارد؛ جست‌وجوی آنلاین و معنی همهٔ کلمات هنوز اضافه نشده است. فایل‌های قدیمی داخل legacy-files دست‌نخورده باقی می‌مانند.
