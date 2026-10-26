@@ -26,13 +26,17 @@
     }).catch(function () {});
   chrome.storage.local.get({
     textTranslatorEnabled: true, dictionaryMode: "online", sourceLanguage: "en",
-    targetLanguage: "fa", customDictionaries: {}
+    targetLanguage: "fa", customDictionaries: {}, customDictionary: {}
   }, function (data) {
     enabled = data.textTranslatorEnabled !== false;
     dictionaryMode = data.dictionaryMode === "offline" ? "offline" : "online";
     sourceLanguage = data.sourceLanguage || "en";
     targetLanguage = data.targetLanguage || "fa";
     customDictionaries = data.customDictionaries || {};
+    if (!customDictionaries["en-fa"] && data.customDictionary && Object.keys(data.customDictionary).length) {
+      customDictionaries["en-fa"] = data.customDictionary;
+      chrome.storage.local.set({ customDictionaries: customDictionaries });
+    }
     rebuildDictionary();
   });
 
