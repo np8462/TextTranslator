@@ -4,8 +4,11 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (!message || message.type !== "ONLINE_LOOKUP") return;
   chrome.storage.local.get({ onlineDictionaryUrl: DEFAULT_DICTIONARY_URL }, function (settings) {
     var template = (settings.onlineDictionaryUrl || DEFAULT_DICTIONARY_URL).trim();
-    if (template.indexOf("{word}") === -1) {
-      sendResponse({ ok: false, error: "آدرس باید جای‌نگهدار {word} داشته باشد." }); return;
+    // Older versions could store a fixed fa->en URL. Force the parameterized default
+    // unless the saved endpoint supports all three placeholders.
+    if (template.indexOf("{word}") === -1 || template.indexOf("{source}") === -1 || template.indexOf("{target}") === -1) {
+      template = DEFAULT_DICTIONARY_URL;
+      chrome.storage.local.set({ onlineDictionaryUrl: DEFAULT_DICTIONARY_URL });
     }
     var source = message.source || "en";
     var target = message.target || "fa";
