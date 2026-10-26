@@ -6,23 +6,22 @@
 <p id="status" role="status">در حال بررسی وضعیت...</p>
 <button id="toggle" type="button">...</button>
 <section class="panel">
-<h2>جست‌وجوی معنی</h2>
+<h2>حالت دیکشنری</h2>
+<button id="mode-toggle" type="button" aria-pressed="true">حالت دیکشنری: آنلاین</button>
+<p id="mode-help">در حالت آنلاین، معنی از آدرس پیش‌فرض دیکشنری گرفته می‌شود؛ در حالت آفلاین فقط واژه‌های ذخیره‌شده استفاده می‌شوند.</p>
 <label for="word">کلمهٔ انگلیسی</label>
 <input id="word" type="text" maxlength="40" placeholder="مثلاً: apple" dir="ltr">
-<div class="lookup-actions">
-<button id="lookup-offline" type="button">جست‌وجوی آفلاین</button>
-<button id="lookup-online" type="button">جست‌وجوی آنلاین</button>
-</div>
-<p id="result" role="status">روش دلخواه را انتخاب کن؛ برای کلمهٔ جدید ابتدا آنلاین جست‌وجو کن.</p>
-<button id="save-word" class="add-word" type="button" disabled><span aria-hidden="true">＋</span> افزودن به دیکشنری آفلاین</button>
+<button id="lookup" type="button">پیدا کردن معنی</button>
+<p id="result" role="status">یک کلمه وارد کن و «پیدا کردن معنی» را بزن.</p>
+<button id="save-word" class="add-word" type="button" disabled><span aria-hidden="true">＋</span> افزودن معنی به دیکشنری آفلاین</button>
 </section>
 <section class="panel">
 <h2>تنظیم دیکشنری آنلاین</h2>
 <label for="endpoint">آدرس سرویس (باید شامل {word} باشد)</label>
 <input id="endpoint" type="text" dir="ltr">
 <button id="save-endpoint" type="button">ذخیرهٔ آدرس آنلاین</button>
-<p class="note">آدرس پیش‌فرض MyMemory انگلیسی به فارسی است. سرویس سفارشی باید JSON با فیلد meaning یا responseData.translatedText برگرداند.</p>
+<p class="note">آدرس پیش‌فرض، سرویس ترجمهٔ انگلیسی به فارسی است. چون ترجمهٔ ماشینی ممکن است نام برند را با معنی واژه اشتباه بگیرد، نتیجهٔ کلمات چندمعنا همیشه نیاز به بررسی دارد.</p>
 </section>
 <section class="help"><h2>راهنمای استفاده</h2>
-<ol><li>جست‌وجوی آفلاین فقط از واژه‌های ذخیره‌شده استفاده می‌کند.</li><li>جست‌وجوی آنلاین معنی را از سرویس انتخاب‌شده می‌گیرد.</li><li>پس از پیدا شدن معنی آنلاین، دکمهٔ ＋ را بزن تا برای استفادهٔ آفلاین ذخیره شود.</li></ol></section>
+<ol><li>حالت دیکشنری را با یک دکمه بین آنلاین و آفلاین عوض کن.</li><li>در حالت آنلاین، معنی از آدرس ذخیره‌شده گرفته می‌شود.</li><li>پس از پیدا شدن معنی آنلاین، دکمهٔ ＋ را بزن تا برای استفادهٔ آفلاین ذخیره شود.</li></ol></section>
 </main><script src="popup.js"></script></body></html>
