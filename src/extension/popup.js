@@ -4,7 +4,8 @@ document.addEventListener("DOMContentLoaded", function () {
   var status = document.getElementById("status");
   var toggle = document.getElementById("toggle");
   var wordInput = document.getElementById("word");
-  var lookup = document.getElementById("lookup");
+  var lookupOffline = document.getElementById("lookup-offline");
+  var lookupOnline = document.getElementById("lookup-online");
   var result = document.getElementById("result");
   var saveWord = document.getElementById("save-word");
   var endpoint = document.getElementById("endpoint");
@@ -12,6 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var currentWord = "";
   var currentMeaning = "";
   var offline = {};
+  var offlineLoaded = false;
 
   function render(enabled) {
     status.textContent = enabled ? "وضعیت: افزونه فعال است." : "وضعیت: افزونه خاموش است.";
@@ -27,13 +29,54 @@ document.addEventListener("DOMContentLoaded", function () {
     } catch (e) { return null; }
   }
 
-  function requestOnline(word) {
+  function validWord() {
+    var word = wordInput.value.trim().toLowerCase();
+    if (!/^[a-z][a-z'-]{0,39}$/.test(word)) {
+      result.textContent = "لطفاً یک کلمهٔ انگلیسی معتبر وارد کن.";
+      saveWord.disabled = true;
+      return "";
+    }
+    return word;
+  }
+
+  function showMeaning(word, meaning, source) {
+    currentWord = word;
+    currentMeaning = meaning;
+    result.textContent = (source === "online" ? "معنی آنلاین: " : "معنی آفلاین: ") + meaning;
+    saveWord.disabled = false;
+  }
+
+  function lookupOfflineWord() {
+    var word = validWord();
+    if (!word) return;
+    if (!offlineLoaded) {
+      result.textContent = "واژه‌نامهٔ آفلاین هنوز در حال بارگذاری است؛ یک لحظه دیگر امتحان کن.";
+      return;
+    }
+    if (offline[word]) {
+      showMeaning(word, offline[word], "offline");
+    } else {
+      currentWord = word;
+      currentMeaning = "";
+      saveWord.disabled = true;
+      result.textContent = "این کلمه در دیکشنری آفلاین نیست. دکمهٔ جست‌وجوی آنلاین را بزن.";
+    }
+  }
+
+  function lookupOnlineWord() {
+    var word = validWord();
+    if (!word) return;
     var urlText = endpoint.value.trim() || DEFAULT_URL;
     var pattern = getHostPattern(urlText);
     if (!pattern || urlText.indexOf("{word}") === -1) {
-      result.textContent = "آدرس نامعتبر است؛ باید یک آدرس HTTP/HTTPS و جای‌نگهدار {word} داشته باشد.";
+      result.textContent = "آدرس نامعتبر است؛ باید HTTP/HTTPS باشد و {word} داشته باشد.";
+      saveWord.disabled = true;
       return;
     }
+    currentWord = word;
+    currentMeaning = "";
+    saveWord.disabled = true;
+    result.textContent = "در حال جست‌وجوی آنلاین...";
     chrome.permissions.request({ origins: [pattern] }, function (granted) {
       if (!granted) {
         result.textContent = "اجازهٔ دسترسی به این سرویس داده نشد.";
@@ -41,42 +84,51 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       chrome.storage.local.set({ onlineDictionaryUrl: urlText }, function () {
         chrome.runtime.sendMessage({ type: "ONLINE_LOOKUP", word: word }, function (response) {
-        if (chrome.runtime.lastError) {
-          result.textContent = "خطا در ارتباط با افزونهٔ پس‌زمینه: " + chrome.runtime.lastError.message;
-          return;
-        }
-        if (!response || !response.ok) {
-          result.textContent = response && response.error ? response.error : "معنی آنلاین پیدا نشد.";
-          return;
-        }
-        currentWord = word;
-        currentMeaning = response.meaning;
-        result.textContent = "معنی آنلاین: " + currentMeaning;
-        saveWord.disabled = false;
+          if (chrome.runtime.lastError) {
+            result.textContent = "خطا در ارتباط با افزونهٔ پس‌زمینه: " + chrome.runtime.lastError.message;
+            return;
+          }
+          if (!response || !response.ok) {
+            result.textContent = response && response.error ? response.error : "معنی آنلاین پیدا نشد.";
+            return;
+          }
+          showMeaning(word, response.meaning, "online");
         });
       });
     });
   }
 
-  chrome.storage.local.get({ textTranslatorEnabled: true, onlineDictionaryUrl: DEFAULT_URL, customDictionary: {} }, function (data) {
+  chrome.storage.local.get({ textTranslatorEnabled: true, onlineDictionaryUrl: DEFAULT_URL }, function (data) {
     render(data.textTranslatorEnabled !== false);
     endpoint.value = data.onlineDictionaryUrl || DEFAULT_URL;
   });
 
-  fetch(chrome.runtime.getURL("dictionary.json")).then(function (r) { return r.json(); }).then(function (data) {
-    offline = data || {};
-    chrome.storage.local.get({ customDictionary: {} }, function (saved) {
-      Object.keys(saved.customDictionary || {}).forEach(function (key) {
-        offline[key.toLowerCase()] = saved.customDictionary[key];
+  function loadOffline() {
+    fetch(chrome.runtime.getURL("dictionary.json")).then(function (response) {
+      if (!response.ok) throw new Error("Could not load dictionary.json");
+      return response.json();
+    }).then(function (data) {
+      offline = {};
+      Object.keys(data || {}).forEach(function (key) {
+        if (typeof data[key] === "string") offline[key.toLowerCase()] = data[key];
+      });
+      chrome.storage.local.get({ customDictionary: {} }, function (saved) {
+        Object.keys(saved.customDictionary || {}).forEach(function (key) {
+          offline[key.toLowerCase()] = saved.customDictionary[key];
+        });
+        offlineLoaded = true;
+      });
+    }).catch(function () {
+      chrome.storage.local.get({ customDictionary: {} }, function (saved) {
+        offline = {};
+        Object.keys(saved.customDictionary || {}).forEach(function (key) {
+          offline[key.toLowerCase()] = saved.customDictionary[key];
+        });
+        offlineLoaded = true;
       });
     });
-  }).catch(function () {
-    chrome.storage.local.get({ customDictionary: {} }, function (saved) {
-      Object.keys(saved.customDictionary || {}).forEach(function (key) {
-        offline[key.toLowerCase()] = saved.customDictionary[key];
-      });
-    });
-  });
+  }
+  loadOffline();
 
   toggle.addEventListener("click", function () {
     chrome.storage.local.get({ textTranslatorEnabled: true }, function (data) {
@@ -85,35 +137,23 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  lookup.addEventListener("click", function () {
-    var word = wordInput.value.trim().toLowerCase();
-    if (!/^[a-z][a-z'-]{0,39}$/.test(word)) {
-      result.textContent = "لطفاً یک کلمهٔ انگلیسی معتبر وارد کن.";
-      saveWord.disabled = true;
-      return;
-    }
-    currentWord = word;
-    currentMeaning = "";
-    saveWord.disabled = true;
-    var localMeaning = offline[word];
-    if (localMeaning) {
-      currentMeaning = localMeaning;
-      result.textContent = "معنی آفلاین: " + localMeaning;
-      saveWord.disabled = false;
-    } else {
-      result.textContent = "در آفلاین نبود؛ در حال جست‌وجوی آنلاین...";
-      requestOnline(word);
-    }
+  lookupOffline.addEventListener("click", lookupOfflineWord);
+  lookupOnline.addEventListener("click", lookupOnlineWord);
+  wordInput.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") lookupOfflineWord();
   });
 
   saveWord.addEventListener("click", function () {
     if (!currentWord || !currentMeaning) return;
+    var wordToSave = currentWord;
+    var meaningToSave = currentMeaning;
     chrome.storage.local.get({ customDictionary: {} }, function (data) {
       var saved = data.customDictionary || {};
-      saved[currentWord] = currentMeaning;
+      saved[wordToSave] = meaningToSave;
       chrome.storage.local.set({ customDictionary: saved }, function () {
-        offline[currentWord] = currentMeaning;
-        result.textContent = "ذخیره شد؛ از این پس این معنی آفلاین هم در دسترس است.";
+        offline[wordToSave] = meaningToSave;
+        offlineLoaded = true;
+        result.textContent = "＋ ذخیره شد! «" + wordToSave + "» از این پس در دیکشنری آفلاین هم موجود است.";
         saveWord.disabled = true;
       });
     });
@@ -121,11 +161,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   saveEndpoint.addEventListener("click", function () {
     var urlText = endpoint.value.trim();
-    if (!getHostPattern(urlText) || urlText.indexOf("{word}") === -1) {
+    var pattern = getHostPattern(urlText);
+    if (!pattern || urlText.indexOf("{word}") === -1) {
       result.textContent = "آدرس معتبر نیست یا {word} ندارد.";
       return;
     }
-    var pattern = getHostPattern(urlText);
     chrome.permissions.request({ origins: [pattern] }, function (granted) {
       if (!granted) {
         result.textContent = "برای این آدرس اجازه داده نشد؛ آدرس ذخیره نشد.";
