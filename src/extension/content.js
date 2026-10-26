@@ -24,8 +24,23 @@
     var saved = customDictionaries[pairKey()] || {};
     Object.keys(saved).forEach(function (key) { if (typeof saved[key] === "string") dictionary[key.toLowerCase()] = saved[key]; });
   }
-  fetch(chrome.runtime.getURL("dictionaries.json")).then(function (response) { if (!response.ok) throw new Error("starter dictionaries load failed"); return response.json(); })
-    .then(function (data) { seedDictionaries = data || {}; rebuildDictionary(); }).catch(function () {});
+  function loadPairDictionary() {
+    var key = pairKey();
+    fetch(chrome.runtime.getURL("dictionaries/" + key + ".json")).then(function (response) {
+      if (!response.ok) throw new Error("pair dictionary not found");
+      return response.json();
+    }).then(function (data) {
+      if (pairKey() !== key) return;
+      seedDictionaries = {};
+      seedDictionaries[key] = data || {};
+      rebuildDictionary();
+    }).catch(function () {
+      if (pairKey() !== key) return;
+      seedDictionaries = {};
+      rebuildDictionary();
+    });
+  }
+  loadPairDictionary();
   fetch(chrome.runtime.getURL("dictionary.json")).then(function (response) { return response.json(); })
     .then(function (data) {
       Object.keys(data || {}).forEach(function (key) { if (typeof data[key] === "string") baseDictionary[key.toLowerCase()] = data[key]; });
@@ -73,7 +88,7 @@
     var top = rect.bottom + 8;
     if (top + card.offsetHeight > window.innerHeight - 8) top = rect.top - card.offsetHeight - 8;
     card.style.left = left + "px"; card.style.top = Math.max(8, top) + "px";
-    if (!isLoading) cardTimer = setTimeout(removeCard, displayDurationSeconds * 1000);
+    if (!isLoading) cardTimer = setTimeout(function () { removeCard(); lastHoverWord = ""; }, displayDurationSeconds * 1000);
   }
   function isEditable(node) {
     if (!node) return false;
@@ -176,7 +191,9 @@
     if (changes.targetLanguage) targetLanguage = changes.targetLanguage.newValue || "fa";
     if (changes.customDictionaries) customDictionaries = changes.customDictionaries.newValue || {};
     if (changes.dictionaryMode || changes.sourceLanguage || changes.targetLanguage || changes.customDictionaries) {
-      requestId++; removeCard(); rebuildDictionary();
+      requestId++; removeCard();
+      if (changes.sourceLanguage || changes.targetLanguage) loadPairDictionary();
+      else rebuildDictionary();
     }
   });
 })();
