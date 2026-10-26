@@ -38,6 +38,10 @@ document.addEventListener("DOMContentLoaded", function () {
       ? "حالت آنلاین: معنی از سرویس اینترنتی گرفته می‌شود؛ این تنظیم در هایلایت صفحات هم اعمال می‌شود."
       : "حالت آفلاین: فقط دیکشنری پایه و واژه‌های ذخیره‌شدهٔ همین جفت‌زبان جست‌وجو می‌شوند.";
   }
+  function normalizeEndpoint(urlText) {
+    if (!urlText || urlText.indexOf("{word}") === -1 || urlText.indexOf("{source}") === -1 || urlText.indexOf("{target}") === -1) return DEFAULT_URL;
+    return urlText;
+  }
   function getHostPattern(urlText) {
     try {
       var testUrl = urlText.replace(/\{word\}/g, "hello").replace(/\{source\}/g, "en").replace(/\{target\}/g, "fa");
@@ -74,10 +78,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
   function lookupOnlineWord(word) {
-    var urlText = endpoint.value.trim() || DEFAULT_URL;
+    var urlText = normalizeEndpoint(endpoint.value.trim());
+    endpoint.value = urlText;
     var pattern = getHostPattern(urlText);
-    if (!pattern || urlText.indexOf("{word}") === -1) {
-      result.textContent = "آدرس نامعتبر است؛ باید HTTP/HTTPS باشد و {word} داشته باشد.";
+    if (!pattern) {
+      result.textContent = "آدرس نامعتبر است؛ باید HTTP/HTTPS باشد و {word}، {source} و {target} را داشته باشد.";
       saveWord.disabled = true; return;
     }
     currentWord = word; currentMeaning = ""; saveWord.disabled = true;
@@ -131,7 +136,8 @@ document.addEventListener("DOMContentLoaded", function () {
     sourceLanguage: "en", targetLanguage: "fa"
   }, function (data) {
     render(data.textTranslatorEnabled !== false);
-    endpoint.value = data.onlineDictionaryUrl || DEFAULT_URL;
+    endpoint.value = normalizeEndpoint(data.onlineDictionaryUrl || DEFAULT_URL);
+    if (endpoint.value !== data.onlineDictionaryUrl) chrome.storage.local.set({ onlineDictionaryUrl: endpoint.value });
     dictionaryMode = data.dictionaryMode === "offline" ? "offline" : "online";
     sourceLanguage = LANGUAGE_NAMES[data.sourceLanguage] ? data.sourceLanguage : "en";
     targetLanguage = LANGUAGE_NAMES[data.targetLanguage] ? data.targetLanguage : "fa";
@@ -177,9 +183,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
   saveEndpoint.addEventListener("click", function () {
-    var urlText = endpoint.value.trim(), pattern = getHostPattern(urlText);
-    if (!pattern || urlText.indexOf("{word}") === -1) {
-      result.textContent = "آدرس معتبر نیست یا {word} ندارد."; return;
+    var urlText = normalizeEndpoint(endpoint.value.trim()), pattern = getHostPattern(urlText);
+    endpoint.value = urlText;
+    if (!pattern) {
+      result.textContent = "آدرس باید HTTP/HTTPS باشد و {word}، {source} و {target} را داشته باشد."; return;
     }
     chrome.permissions.request({ origins: [pattern] }, function (granted) {
       if (!granted) { result.textContent = "برای این آدرس اجازه داده نشد؛ آدرس ذخیره نشد."; return; }
