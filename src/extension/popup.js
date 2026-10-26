@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
         chrome.runtime.sendMessage({ type: "ONLINE_LOOKUP", word: word, source: sourceLanguage, target: targetLanguage }, function (response) {
           if (chrome.runtime.lastError) { result.textContent = "خطا در ارتباط با افزونهٔ پس‌زمینه: " + chrome.runtime.lastError.message; return; }
           if (!response || !response.ok) { result.textContent = response && response.error ? response.error : "معنی آنلاین پیدا نشد."; return; }
-          showMeaning(word, response.meaning, "online");
+          showMeaning(word, response.meaning, response.offlineFallback ? "offline" : "online");
         });
       });
     });
