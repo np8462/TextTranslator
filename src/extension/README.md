@@ -30,7 +30,7 @@
 ## Notes
 
 - The bundled English → Persian dictionary includes \`apple: سیب\` for the common fruit meaning.
-- Custom saved dictionaries are stored locally in Chrome and do not modify \`dictionary.json\` in the repository.
+- Custom saved dictionaries are stored locally in Chrome and do not modify the pair JSON files in the repository.
 - The online endpoint requires internet access and permission to contact its host. It is unofficial and may change without notice. HTTP 429 means the service is rate-limiting requests; caching reduces repeat requests but cannot guarantee the endpoint will always work.
 - Machine translation is not a full educational dictionary and can give context-dependent results.
 - The prototype looks up individual selected words, not phrases with spaces.
