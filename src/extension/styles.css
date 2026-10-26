@@ -19,3 +19,7 @@ input, select { width: 100%; box-sizing: border-box; margin-top: 5px; padding: 8
 .add-word span { font-size: 18px; margin-left: 4px; }
 .note { color: #5f6368; font-size: 11px; }
 ol { padding-right: 22px; line-height: 1.8; font-size: 12px; }
+.dictionary-view { margin-top: 12px; border-top: 1px dashed #dadce0; padding-top: 8px; }
+#dictionary-count { font-size: 11px; }
+#dictionary-list { max-height: 190px; overflow-y: auto; padding-right: 22px; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+#dictionary-list li { margin-bottom: 3px; }
