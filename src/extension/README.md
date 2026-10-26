@@ -2,7 +2,7 @@
 
 **Status:** Local prototype, version 0.4.0. Changes are limited to the test branch; this is not a published Chrome Web Store release.
 
-این افزونه می‌تواند هنگام انتخاب یک واژه در صفحه، معنی آن را در یک کارت کوچک نشان دهد. حالت آنلاین/آفلاین و جفت‌زبان انتخاب‌شده در پنجرهٔ افزونه برای کلمات هایلایت‌شده نیز اعمال می‌شود.
+این افزونه می‌تواند هنگام بردن ماوس روی یک واژه یا انتخاب آن در صفحه، معنی آن را در یک کارت کوچک نشان دهد. حالت آنلاین/آفلاین و جفت‌زبان انتخاب‌شده در پنجرهٔ افزونه برای کلمات هایلایت‌شده نیز اعمال می‌شود.
 
 ## Features
 
@@ -24,7 +24,7 @@
 4. Select the \`src/extension\` folder (the folder containing \`manifest.json\`).
 5. If already installed, press Reload on the extension card and refresh open webpages.
 6. Choose the source and target languages, then click **اعمال زبان‌ها**.
-7. Select online or offline mode and search a word, or select a single word on a webpage.
+7. Select online or offline mode and search a word, or hover over a single word or select it on a webpage.
 8. After an online meaning appears, click **＋** in the popup to save it for offline use in the same language pair.
 
 ## Notes
