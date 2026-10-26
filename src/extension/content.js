@@ -5,20 +5,27 @@
   var targetLanguage = "fa";
   var card = null;
   var hideTimer = null;
+  var cardTimer = null;
+  var displayDurationSeconds = 2;
   var requestId = 0;
   var baseDictionary = {};
   var dictionary = {};
   var customDictionaries = {};
+  var seedDictionaries = {};
 
   function pairKey() { return sourceLanguage + "-" + targetLanguage; }
   function rebuildDictionary() {
     dictionary = {};
+    var seeded = seedDictionaries[pairKey()] || {};
+    Object.keys(seeded).forEach(function (key) { dictionary[key.toLowerCase()] = seeded[key]; });
     if (sourceLanguage === "en" && targetLanguage === "fa") {
-      Object.keys(baseDictionary).forEach(function (key) { dictionary[key] = baseDictionary[key]; });
+      Object.keys(baseDictionary).forEach(function (key) { dictionary[key.toLowerCase()] = baseDictionary[key]; });
     }
     var saved = customDictionaries[pairKey()] || {};
     Object.keys(saved).forEach(function (key) { if (typeof saved[key] === "string") dictionary[key.toLowerCase()] = saved[key]; });
   }
+  fetch(chrome.runtime.getURL("dictionaries.json")).then(function (response) { if (!response.ok) throw new Error("starter dictionaries load failed"); return response.json(); })
+    .then(function (data) { seedDictionaries = data || {}; rebuildDictionary(); }).catch(function () {});
   fetch(chrome.runtime.getURL("dictionary.json")).then(function (response) { return response.json(); })
     .then(function (data) {
       Object.keys(data || {}).forEach(function (key) { if (typeof data[key] === "string") baseDictionary[key.toLowerCase()] = data[key]; });
@@ -26,13 +33,14 @@
     }).catch(function () {});
   chrome.storage.local.get({
     textTranslatorEnabled: true, dictionaryMode: "online", sourceLanguage: "en",
-    targetLanguage: "fa", customDictionaries: {}, customDictionary: {}
+    targetLanguage: "fa", customDictionaries: {}, customDictionary: {}, tooltipDurationSeconds: 2
   }, function (data) {
     enabled = data.textTranslatorEnabled !== false;
     dictionaryMode = data.dictionaryMode === "offline" ? "offline" : "online";
     sourceLanguage = data.sourceLanguage || "en";
     targetLanguage = data.targetLanguage || "fa";
     customDictionaries = data.customDictionaries || {};
+    displayDurationSeconds = [1,2,3,5,8].indexOf(Number(data.tooltipDurationSeconds)) >= 0 ? Number(data.tooltipDurationSeconds) : 2;
     if (!customDictionaries["en-fa"] && data.customDictionary && Object.keys(data.customDictionary).length) {
       customDictionaries["en-fa"] = data.customDictionary;
       chrome.storage.local.set({ customDictionaries: customDictionaries });
@@ -41,6 +49,7 @@
   });
 
   function removeCard() {
+    if (cardTimer) { clearTimeout(cardTimer); cardTimer = null; }
     if (card && card.parentNode) card.parentNode.removeChild(card);
     card = null;
   }
@@ -64,6 +73,7 @@
     var top = rect.bottom + 8;
     if (top + card.offsetHeight > window.innerHeight - 8) top = rect.top - card.offsetHeight - 8;
     card.style.left = left + "px"; card.style.top = Math.max(8, top) + "px";
+    cardTimer = setTimeout(removeCard, displayDurationSeconds * 1000);
   }
   function isEditable(node) {
     if (!node) return false;
@@ -161,6 +171,7 @@
       if (!enabled) removeCard();
     }
     if (changes.dictionaryMode) dictionaryMode = changes.dictionaryMode.newValue === "offline" ? "offline" : "online";
+    if (changes.tooltipDurationSeconds) displayDurationSeconds = [1,2,3,5,8].indexOf(Number(changes.tooltipDurationSeconds.newValue)) >= 0 ? Number(changes.tooltipDurationSeconds.newValue) : 2;
     if (changes.sourceLanguage) sourceLanguage = changes.sourceLanguage.newValue || "en";
     if (changes.targetLanguage) targetLanguage = changes.targetLanguage.newValue || "fa";
     if (changes.customDictionaries) customDictionaries = changes.customDictionaries.newValue || {};
