@@ -22,7 +22,6 @@ document.addEventListener("DOMContentLoaded", function () {
   var sourceLanguage = "en";
   var targetLanguage = "fa";
   var offline = {};
-  var baseOffline = {};
   var offlineLoaded = false;
 
   function pairKey() { return sourceLanguage + "-" + targetLanguage; }
@@ -117,9 +116,6 @@ document.addEventListener("DOMContentLoaded", function () {
       Object.keys(seeded || {}).forEach(function (word) {
         if (typeof seeded[word] === "string") offline[word.toLowerCase()] = seeded[word];
       });
-      if (sourceLanguage === "en" && targetLanguage === "fa") {
-        Object.keys(baseOffline).forEach(function (word) { offline[word.toLowerCase()] = baseOffline[word]; });
-      }
       chrome.storage.local.get({ customDictionaries: {}, customDictionary: {} }, function (saved) {
         if (key !== pairKey()) return;
         var dictionaries = saved.customDictionaries || {};
@@ -135,14 +131,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
   }
-  fetch(chrome.runtime.getURL("dictionary.json")).then(function (response) {
-    if (!response.ok) throw new Error("dictionary load failed");
-    return response.json();
-  }).then(function (data) {
-    Object.keys(data || {}).forEach(function (key) { if (typeof data[key] === "string") baseOffline[key.toLowerCase()] = data[key]; });
-    loadOffline();
-  }).catch(function () { loadOffline(); });
-
   chrome.storage.local.get({
     textTranslatorEnabled: true, onlineDictionaryUrl: DEFAULT_URL, dictionaryMode: "online",
     sourceLanguage: "en", targetLanguage: "fa", tooltipDurationSeconds: 2
