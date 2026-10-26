@@ -22,6 +22,17 @@
     mergeDictionary(data.customDictionary);
   });
 
+  function mergeDictionary(source) {
+    if (!source || typeof source !== "object") return;
+    Object.keys(source).forEach(function (key) {
+      if (typeof source[key] === "string") dictionary[key.toLowerCase()] = source[key];
+    });
+  }
+
+  fetch(chrome.runtime.getURL("dictionary.json")).then(function (response) {
+    return response.json();
+  }).then(function (data) { mergeDictionary(data); }).catch(function () {});
+
   function removeCard() {
     if (card && card.parentNode) card.parentNode.removeChild(card);
     card = null;
