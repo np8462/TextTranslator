@@ -10,6 +10,13 @@ button:disabled { background: #9aa0a6; cursor: default; }
 h2 { font-size: 15px; margin-bottom: 8px; }
 label { display: block; margin-top: 8px; font-size: 12px; }
 input { width: 100%; box-sizing: border-box; margin-top: 5px; padding: 8px; border: 1px solid #bdc1c6; border-radius: 5px; font: 13px Arial, sans-serif; }
+.lookup-actions { display: flex; gap: 8px; }
+.lookup-actions button { flex: 1; min-width: 0; }
+#lookup-offline { background: #4b6655; }
+#lookup-offline:hover { background: #344b3c; }
 #result { min-height: 24px; padding: 7px; background: #f5f7f9; border-radius: 5px; }
+.add-word { background: #218653; font-weight: bold; }
+.add-word:hover { background: #17683f; }
+.add-word span { font-size: 18px; margin-left: 4px; }
 .note { color: #5f6368; font-size: 11px; }
 ol { padding-right: 22px; line-height: 1.8; font-size: 12px; }
