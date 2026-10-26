@@ -2,48 +2,25 @@
   var enabled = true;
   var card = null;
   var hideTimer = null;
-  var dictionary = {
-    hello: "سلام",
-    world: "دنیا، جهان",
-    book: "کتاب",
-    water: "آب",
-    house: "خانه",
-    home: "خانه، منزل",
-    good: "خوب",
-    bad: "بد",
-    friend: "دوست",
-    family: "خانواده",
-    love: "عشق، دوست داشتن",
-    work: "کار، کار کردن",
-    learn: "یاد گرفتن، آموختن",
-    language: "زبان",
-    word: "کلمه، واژه",
-    computer: "رایانه، کامپیوتر",
-    time: "زمان، وقت",
-    day: "روز",
-    night: "شب",
-    happy: "خوشحال",
-    beautiful: "زیبا",
-    important: "مهم",
-    help: "کمک، کمک کردن",
-    read: "خواندن",
-    write: "نوشتن",
-    speak: "صحبت کردن",
-    understand: "فهمیدن، درک کردن",
-    example: "مثال، نمونه",
-    test: "آزمایش، آزمون",
-    open: "باز کردن، باز",
-    close: "بستن، بسته",
-    small: "کوچک",
-    big: "بزرگ",
-    fast: "سریع",
-    slow: "آهسته، کند",
-    new: "جدید",
-    old: "قدیمی، پیر",
-    thank: "تشکر کردن",
-    thanks: "ممنون، متشکرم",
-    please: "لطفاً"
-  };
+  var dictionary = {};
+
+  function mergeDictionary(source) {
+    if (!source || typeof source !== "object") return;
+    Object.keys(source).forEach(function (key) {
+      if (typeof source[key] === "string") dictionary[key.toLowerCase()] = source[key];
+    });
+  }
+
+  fetch(chrome.runtime.getURL("dictionary.json")).then(function (response) {
+    return response.json();
+  }).then(function (data) {
+    mergeDictionary(data);
+  }).catch(function () {});
+
+  chrome.storage.local.get({ textTranslatorEnabled: true, customDictionary: {} }, function (data) {
+    enabled = data.textTranslatorEnabled !== false;
+    mergeDictionary(data.customDictionary);
+  });
 
   function removeCard() {
     if (card && card.parentNode) card.parentNode.removeChild(card);
@@ -70,7 +47,6 @@
       hideTimer = setTimeout(removeCard, 350);
     });
     document.documentElement.appendChild(card);
-
     var left = Math.max(8, Math.min(rect.left, window.innerWidth - 300));
     var top = rect.bottom + 8;
     if (top + card.offsetHeight > window.innerHeight - 8) top = rect.top - card.offsetHeight - 8;
@@ -94,7 +70,7 @@
     if (!/^[A-Za-z][A-Za-z'-]*$/.test(word) || word.length > 40) return;
     var rect = selection.getRangeAt(0).getBoundingClientRect();
     if (!rect || (!rect.width && !rect.height)) return;
-    var meaning = dictionary[word.toLowerCase()] || "این کلمه هنوز در واژه‌نامهٔ آزمایشی نیست.";
+    var meaning = dictionary[word.toLowerCase()] || "این کلمه در واژه‌نامهٔ آفلاین نیست؛ از دکمهٔ جست‌وجوی افزونه استفاده کن.";
     makeCard(word, meaning, rect);
   }
 
@@ -109,30 +85,24 @@
     var overSelection = false;
     if (selection && selection.rangeCount > 0 && !selection.isCollapsed) {
       var selectedRect = selection.getRangeAt(0).getBoundingClientRect();
-      overSelection = event.clientX >= selectedRect.left &&
-        event.clientX <= selectedRect.right &&
-        event.clientY >= selectedRect.top &&
-        event.clientY <= selectedRect.bottom;
+      overSelection = event.clientX >= selectedRect.left && event.clientX <= selectedRect.right &&
+        event.clientY >= selectedRect.top && event.clientY <= selectedRect.bottom;
     }
     if (overSelection || card.contains(event.target)) {
       if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
-    } else if (!hideTimer) {
-      hideTimer = setTimeout(removeCard, 450);
-    }
+    } else if (!hideTimer) hideTimer = setTimeout(removeCard, 450);
   });
 
   document.addEventListener("mousedown", function (event) {
     if (card && !card.contains(event.target)) removeCard();
   });
 
-  chrome.storage.local.get({ textTranslatorEnabled: true }, function (data) {
-    enabled = data.textTranslatorEnabled !== false;
-  });
-
   chrome.storage.onChanged.addListener(function (changes, areaName) {
-    if (areaName === "local" && changes.textTranslatorEnabled) {
+    if (areaName !== "local") return;
+    if (changes.textTranslatorEnabled) {
       enabled = changes.textTranslatorEnabled.newValue !== false;
       if (!enabled) removeCard();
     }
+    if (changes.customDictionary) mergeDictionary(changes.customDictionary.newValue);
   });
 })();
