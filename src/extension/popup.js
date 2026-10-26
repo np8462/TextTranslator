@@ -15,6 +15,9 @@ document.addEventListener("DOMContentLoaded", function () {
   var saveWord = document.getElementById("save-word");
   var endpoint = document.getElementById("endpoint");
   var saveEndpoint = document.getElementById("save-endpoint");
+  var displayDuration = document.getElementById("display-duration");
+  var dictionaryCount = document.getElementById("dictionary-count");
+  var dictionaryList = document.getElementById("dictionary-list");
   var currentWord = "";
   var currentMeaning = "";
   var dictionaryMode = "online";
@@ -22,6 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var targetLanguage = "fa";
   var offline = {};
   var baseOffline = {};
+  var seedDictionaries = {};
   var offlineLoaded = false;
 
   function pairKey() { return sourceLanguage + "-" + targetLanguage; }
@@ -104,11 +108,29 @@ document.addEventListener("DOMContentLoaded", function () {
     if (dictionaryMode === "online") lookupOnlineWord(word);
     else lookupOfflineWord(word);
   }
+  function renderDictionaryList(savedPairWords) {
+    var keys = Object.keys(offline).sort();
+    dictionaryCount.textContent = "جفت‌زبان: " + pairKey() + " | کل واژه‌ها: " + keys.length + " | واژه‌های افزوده‌شده توسط تو: " + Object.keys(savedPairWords || {}).length + ". ذخیرهٔ شخصی در Chrome > حافظهٔ محلی افزونه است.";
+    dictionaryList.textContent = "";
+    if (!keys.length) {
+      var empty = document.createElement("li"); empty.textContent = "این جفت‌زبان هنوز واژه‌ای ندارد."; dictionaryList.appendChild(empty); return;
+    }
+    keys.forEach(function (key, index) {
+      if (index >= 150) return;
+      var item = document.createElement("li");
+      var word = document.createElement("strong"); word.textContent = key;
+      var meaning = document.createElement("span"); meaning.textContent = " — " + offline[key];
+      item.appendChild(word); item.appendChild(meaning); dictionaryList.appendChild(item);
+    });
+    if (keys.length > 150) { var more = document.createElement("li"); more.textContent = "نمایش ۱۵۰ واژهٔ اول از " + keys.length + " واژه."; dictionaryList.appendChild(more); }
+  }
   function loadOffline() {
     offlineLoaded = false;
     offline = {};
+    var seeded = seedDictionaries[pairKey()] || {};
+    Object.keys(seeded).forEach(function (key) { offline[key.toLowerCase()] = seeded[key]; });
     if (sourceLanguage === "en" && targetLanguage === "fa") {
-      Object.keys(baseOffline).forEach(function (key) { offline[key] = baseOffline[key]; });
+      Object.keys(baseOffline).forEach(function (key) { offline[key.toLowerCase()] = baseOffline[key]; });
     }
     chrome.storage.local.get({ customDictionaries: {}, customDictionary: {} }, function (saved) {
       var dictionaries = saved.customDictionaries || {};
@@ -121,8 +143,13 @@ document.addEventListener("DOMContentLoaded", function () {
         if (typeof pairWords[key] === "string") offline[key.toLowerCase()] = pairWords[key];
       });
       offlineLoaded = true;
+      renderDictionaryList(pairWords);
     });
   }
+  fetch(chrome.runtime.getURL("dictionaries.json")).then(function (response) {
+    if (!response.ok) throw new Error("starter dictionaries load failed");
+    return response.json();
+  }).then(function (data) { seedDictionaries = data || {}; loadOffline(); }).catch(function () { seedDictionaries = {}; loadOffline(); });
   fetch(chrome.runtime.getURL("dictionary.json")).then(function (response) {
     if (!response.ok) throw new Error("dictionary load failed");
     return response.json();
@@ -133,7 +160,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   chrome.storage.local.get({
     textTranslatorEnabled: true, onlineDictionaryUrl: DEFAULT_URL, dictionaryMode: "online",
-    sourceLanguage: "en", targetLanguage: "fa"
+    sourceLanguage: "en", targetLanguage: "fa", tooltipDurationSeconds: 2
   }, function (data) {
     render(data.textTranslatorEnabled !== false);
     endpoint.value = normalizeEndpoint(data.onlineDictionaryUrl || DEFAULT_URL);
@@ -142,6 +169,7 @@ document.addEventListener("DOMContentLoaded", function () {
     sourceLanguage = LANGUAGE_NAMES[data.sourceLanguage] ? data.sourceLanguage : "en";
     targetLanguage = LANGUAGE_NAMES[data.targetLanguage] ? data.targetLanguage : "fa";
     sourceSelect.value = sourceLanguage; targetSelect.value = targetLanguage;
+    displayDuration.value = String([1,2,3,5,8].indexOf(Number(data.tooltipDurationSeconds)) >= 0 ? Number(data.tooltipDurationSeconds) : 2);
     renderMode(); loadOffline();
   });
 
@@ -149,6 +177,13 @@ document.addEventListener("DOMContentLoaded", function () {
     chrome.storage.local.get({ textTranslatorEnabled: true }, function (data) {
       var nextEnabled = data.textTranslatorEnabled === false;
       chrome.storage.local.set({ textTranslatorEnabled: nextEnabled }, function () { render(nextEnabled); });
+    });
+  });
+  displayDuration.addEventListener("change", function () {
+    var seconds = Number(displayDuration.value);
+    if ([1,2,3,5,8].indexOf(seconds) < 0) seconds = 2;
+    chrome.storage.local.set({ tooltipDurationSeconds: seconds }, function () {
+      result.textContent = "مدت نمایش معنی روی " + seconds + " ثانیه تنظیم شد.";
     });
   });
   modeToggle.addEventListener("click", function () {
@@ -177,7 +212,8 @@ document.addEventListener("DOMContentLoaded", function () {
       dictionaries[key][wordToSave] = meaningToSave;
       chrome.storage.local.set({ customDictionaries: dictionaries }, function () {
         offline[wordToSave] = meaningToSave; offlineLoaded = true;
-        result.textContent = "＋ ذخیره شد! این واژه در دیکشنری آفلاین همین جفت‌زبان هم موجود است.";
+        renderDictionaryList(dictionaries[key]);
+        result.textContent = "＋ ذخیره شد! در دیکشنری «" + key + "» در حافظهٔ محلی Chrome ثبت شد؛ فهرست پایین را ببین.";
         saveWord.disabled = true;
       });
     });
