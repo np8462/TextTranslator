@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "TextTranslator",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Multilingual dictionary with pair-specific offline storage and online highlighted-word lookup.",
   "permissions": [
     "storage"
@@ -31,7 +31,8 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "dictionary.json"
+        "dictionary.json",
+        "dictionaries.json"
       ],
       "matches": [
         "<all_urls>"
