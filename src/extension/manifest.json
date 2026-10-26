@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "TextTranslator",
+  "version": "0.1.0",
+  "description": "A starting point for a Chrome word-lookup extension.",
+  "permissions": [],
+  "action": {
+    "default_title": "TextTranslator",
+    "default_popup": "popup.html"
+  }
+}

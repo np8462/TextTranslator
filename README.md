@@ -1,57 +1,33 @@
 # TextTranslator
-C:\TextTranslator>corflags TextTranslator.exe
 
-Microsoft (R) .NET Framework CorFlags Conversion Tool.  Version  4.0.30319.17929
-این برنامه نیازمند دات نت فریمورک ورژن 4 است...
+## Windows version
 
-# English
+The original Windows utilities and their related files are kept in [`legacy-files/`](legacy-files/). The original `TextTranslator.rar` package is also stored there.
 
-# Word Hover Translator
+## Chrome extension (in development)
 
-A lightweight Windows application that helps you quickly understand selected words while reading.
+A separate Chrome extension source folder is available at [`src/extension/`](src/extension/). Its installation and compatibility notes are in [`src/extension/README.md`](src/extension/README.md).
 
-## Features
+The extension is being prepared for **Google Chrome 109 or later**. It is separate from the existing Windows application.
 
-* Displays the meaning of a highlighted word by hovering the mouse over a label.
-* Supports multiple reading modes:
+## Support
 
-  * Plain Text (.txt)
-  * PDF documents
-  * Web pages (opened by URL)
-* Simple and lightweight user interface.
-* Designed for quick vocabulary lookup without interrupting reading.
-
-> This project was created as a practical tool for improving reading and learning efficiency.
+See [`DONATE.md`](DONATE.md) for support information.
 
 ---
 
-#  فارسی
+# فارسی
 
-# مترجم کلمات با نمایش هنگام نگه داشتن ماوس
+## نسخه ویندوز
 
-یک برنامه سبک ویندوزی برای مشاهده سریع معنی کلمات هنگام مطالعه.
+فایل‌های اجرایی برنامه‌های قدیمی و فایل‌های وابسته به آن‌ها در پوشه [`legacy-files/`](legacy-files/) نگهداری می‌شوند. فایل فشرده اصلی `TextTranslator.rar` نیز در همان پوشه قرار دارد.
 
-## امکانات
+## افزونه کروم (در حال توسعه)
 
-* نمایش معنی کلمه انتخاب‌شده با نگه داشتن نشانگر ماوس روی یک لیبل.
-* پشتیبانی از سه حالت مطالعه:
+سورس جداگانه افزونه کروم در پوشه [`src/extension/`](src/extension/) قرار می‌گیرد. راهنمای نصب و توضیحات سازگاری در فایل [`src/extension/README.md`](src/extension/README.md) است.
 
-  * فایل‌های متنی (TXT)
-  * فایل‌های PDF
-  * صفحات وب (با وارد کردن آدرس)
-* رابط کاربری ساده و سبک.
-* مناسب برای یادگیری زبان و مطالعه بدون وقفه.
+این افزونه برای **Google Chrome نسخه 109 و بالاتر** در نظر گرفته شده و از برنامه ویندوزی جداست.
 
-> این پروژه با هدف افزایش سرعت مطالعه و یادگیری واژگان طراحی شده است.
+## حمایت
 
-سایر فایل ها:
-
-DicEck.exe
-
-PersianDate .exe & .js component...
-
-QrCode web component .dll
-
-Win. farsi component .dll
-
-GifViewer & Candle & butterfly...
+اطلاعات حمایت از پروژه در فایل [`DONATE.md`](DONATE.md) قرار دارد.
