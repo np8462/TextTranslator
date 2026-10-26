@@ -1,5 +1,5 @@
 :root { color-scheme: light; font-family: Tahoma, Arial, sans-serif; }
-body { width: 340px; margin: 0; padding: 14px; color: #202124; background: #fff; box-sizing: border-box; }
+body { width: 350px; margin: 0; padding: 14px; color: #202124; background: #fff; box-sizing: border-box; }
 h1 { margin: 0 0 10px; font-size: 19px; }
 p { line-height: 1.7; overflow-wrap: anywhere; }
 #status { margin: 8px 0; font-weight: bold; }
@@ -9,7 +9,7 @@ button:disabled { background: #9aa0a6; cursor: default; }
 .panel, .help { margin-top: 14px; border-top: 1px solid #dadce0; padding-top: 8px; }
 h2 { font-size: 15px; margin-bottom: 8px; }
 label { display: block; margin-top: 8px; font-size: 12px; }
-input { width: 100%; box-sizing: border-box; margin-top: 5px; padding: 8px; border: 1px solid #bdc1c6; border-radius: 5px; font: 13px Arial, sans-serif; }
+input, select { width: 100%; box-sizing: border-box; margin-top: 5px; padding: 8px; border: 1px solid #bdc1c6; border-radius: 5px; font: 13px Arial, Tahoma, sans-serif; background: #fff; color: #202124; }
 #mode-toggle { background: #218653; font-weight: bold; }
 #mode-toggle[aria-pressed="false"] { background: #59636f; }
 #mode-help { font-size: 12px; }
