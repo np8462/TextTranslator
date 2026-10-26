@@ -103,6 +103,24 @@
     window.setTimeout(lookupSelection, 40);
   });
 
+  document.addEventListener("mousemove", function (event) {
+    if (!card) return;
+    var selection = window.getSelection();
+    var overSelection = false;
+    if (selection && selection.rangeCount > 0 && !selection.isCollapsed) {
+      var selectedRect = selection.getRangeAt(0).getBoundingClientRect();
+      overSelection = event.clientX >= selectedRect.left &&
+        event.clientX <= selectedRect.right &&
+        event.clientY >= selectedRect.top &&
+        event.clientY <= selectedRect.bottom;
+    }
+    if (overSelection || card.contains(event.target)) {
+      if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+    } else if (!hideTimer) {
+      hideTimer = setTimeout(removeCard, 450);
+    }
+  });
+
   document.addEventListener("mousedown", function (event) {
     if (card && !card.contains(event.target)) removeCard();
   });
