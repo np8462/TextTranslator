@@ -2,8 +2,27 @@
 <html lang="fa" dir="rtl">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>TextTranslator</title><link rel="stylesheet" href="styles.css"></head>
 <body><main>
-<h1>TextTranslator</h1><p id="status" role="status">در حال بررسی وضعیت...</p><button id="toggle" type="button">...</button>
-<section class="panel"><h2>جست‌وجوی معنی</h2><label for="word">کلمهٔ انگلیسی</label><input id="word" type="text" maxlength="40" placeholder="مثلاً: apple" dir="ltr"><button id="lookup" type="button">جست‌وجو در آفلاین و آنلاین</button><p id="result" role="status">ابتدا واژه‌نامهٔ آفلاین بررسی می‌شود.</p><button id="save-word" type="button" disabled>افزودن معنی به دیکشنری آفلاین</button></section>
-<section class="panel"><h2>تنظیم دیکشنری آنلاین</h2><label for="endpoint">آدرس سرویس (باید شامل {word} باشد)</label><input id="endpoint" type="text" dir="ltr"><button id="save-endpoint" type="button">ذخیرهٔ آدرس آنلاین</button><p class="note">آدرس پیش‌فرض، سرویس MyMemory انگلیسی به فارسی است. سرویس سفارشی باید JSON با فیلد meaning یا responseData.translatedText برگرداند.</p></section>
-<section class="help"><h2>راهنمای استفاده</h2><ol><li>برای معنی سریع، کلمه‌ای را در صفحه انتخاب کنید.</li><li>برای جست‌وجوی مستقیم یا افزودن واژه، از بخش جست‌وجوی بالا استفاده کنید.</li><li>دیکشنری پایه در فایل dictionary.json است؛ واژه‌های جدید در حافظهٔ افزونه ذخیره می‌شوند.</li></ol></section>
+<h1>TextTranslator</h1>
+<p id="status" role="status">در حال بررسی وضعیت...</p>
+<button id="toggle" type="button">...</button>
+<section class="panel">
+<h2>جست‌وجوی معنی</h2>
+<label for="word">کلمهٔ انگلیسی</label>
+<input id="word" type="text" maxlength="40" placeholder="مثلاً: apple" dir="ltr">
+<div class="lookup-actions">
+<button id="lookup-offline" type="button">جست‌وجوی آفلاین</button>
+<button id="lookup-online" type="button">جست‌وجوی آنلاین</button>
+</div>
+<p id="result" role="status">روش دلخواه را انتخاب کن؛ برای کلمهٔ جدید ابتدا آنلاین جست‌وجو کن.</p>
+<button id="save-word" class="add-word" type="button" disabled><span aria-hidden="true">＋</span> افزودن به دیکشنری آفلاین</button>
+</section>
+<section class="panel">
+<h2>تنظیم دیکشنری آنلاین</h2>
+<label for="endpoint">آدرس سرویس (باید شامل {word} باشد)</label>
+<input id="endpoint" type="text" dir="ltr">
+<button id="save-endpoint" type="button">ذخیرهٔ آدرس آنلاین</button>
+<p class="note">آدرس پیش‌فرض MyMemory انگلیسی به فارسی است. سرویس سفارشی باید JSON با فیلد meaning یا responseData.translatedText برگرداند.</p>
+</section>
+<section class="help"><h2>راهنمای استفاده</h2>
+<ol><li>جست‌وجوی آفلاین فقط از واژه‌های ذخیره‌شده استفاده می‌کند.</li><li>جست‌وجوی آنلاین معنی را از سرویس انتخاب‌شده می‌گیرد.</li><li>پس از پیدا شدن معنی آنلاین، دکمهٔ ＋ را بزن تا برای استفادهٔ آفلاین ذخیره شود.</li></ol></section>
 </main><script src="popup.js"></script></body></html>
