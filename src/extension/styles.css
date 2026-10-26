@@ -1,23 +1,59 @@
 :root {
   color-scheme: light;
-  font-family: Arial, Tahoma, sans-serif;
+  font-family: Tahoma, Arial, sans-serif;
 }
 
 body {
-  width: 280px;
+  width: 320px;
   margin: 0;
   padding: 14px;
   color: #202124;
   background: #ffffff;
+  box-sizing: border-box;
 }
 
 h1 {
-  margin: 0 0 12px;
-  font-size: 18px;
+  margin: 0 0 10px;
+  font-size: 19px;
 }
 
 p {
-  line-height: 1.6;
+  line-height: 1.7;
+}
+
+#status {
+  margin: 8px 0;
+  font-weight: bold;
+}
+
+button {
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: #1769aa;
+  color: white;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0d5187;
+}
+
+.help {
+  margin-top: 14px;
+  border-top: 1px solid #dadce0;
+  padding-top: 8px;
+}
+
+h2 {
+  font-size: 15px;
+}
+
+ol {
+  padding-right: 22px;
+  line-height: 1.8;
 }
 
 .note {
