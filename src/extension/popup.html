@@ -16,7 +16,10 @@
 <option value="fa">فارسی</option><option value="en">انگلیسی</option><option value="de">آلمانی</option><option value="fr">فرانسوی</option><option value="es">اسپانیایی</option><option value="it">ایتالیایی</option><option value="tr">ترکی</option><option value="ar">عربی</option><option value="ru">روسی</option><option value="ja">ژاپنی</option><option value="zh-CN">چینی ساده‌شده</option>
 </select>
 <button id="save-languages" type="button">اعمال زبان‌ها</button>
-<p id="language-help" class="note">هر جفت‌زبان واژه‌های ذخیره‌شدهٔ جداگانه دارد. دیکشنری پایهٔ فعلی برای انگلیسی به فارسی است.</p>
+<p id="language-help" class="note">هر جفت‌زبان دیکشنری مستقل دارد؛ برای زبان‌های اصلی به فارسی و فارسی به آن زبان، واژه‌های اولیه هم اضافه شده‌اند.</p>
+<label for="display-duration">مدت نمایش معنی هنگام hover</label>
+<select id="display-duration"><option value="1">۱ ثانیه</option><option value="2" selected>۲ ثانیه (پیش‌فرض)</option><option value="3">۳ ثانیه</option><option value="5">۵ ثانیه</option><option value="8">۸ ثانیه</option></select>
+<p class="note">این زمان پس از نمایش کارت معنی، آن را خودکار می‌بندد.</p>
 <button id="mode-toggle" type="button" aria-pressed="true">حالت دیکشنری: آنلاین</button>
 <p id="mode-help">حالت انتخاب‌شده هم در این پنجره و هم هنگام هایلایت کلمات استفاده می‌شود.</p>
 <label for="word">واژه برای جست‌وجو</label>
@@ -25,6 +28,11 @@
 <p id="result" role="status">یک واژه وارد کن و «پیدا کردن معنی» را بزن.</p>
 <button id="save-word" class="add-word" type="button" disabled><span aria-hidden="true">＋</span> افزودن معنی به دیکشنری آفلاین همین جفت‌زبان</button>
 <p class="note">ذخیره فقط پس از دریافت معنی آنلاین فعال می‌شود. واژه‌ها در حافظهٔ محلی همین مرورگر Chrome و جداگانه برای هر جفت‌زبان نگهداری می‌شوند؛ داخل فایل‌های GitHub ذخیره نمی‌شوند.</p>
+<section class="dictionary-view">
+<h2>محتوای دیکشنری فعلی</h2>
+<p id="dictionary-count" class="note">در حال بارگذاری واژه‌ها...</p>
+<ul id="dictionary-list"></ul>
+</section>
 </section>
 <section class="panel">
 <h2>تنظیم دیکشنری آنلاین</h2>
