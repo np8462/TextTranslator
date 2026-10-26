@@ -53,9 +53,9 @@ function performLookup(message, sendResponse) {
       template = DEFAULT_DICTIONARY_URL;
       chrome.storage.local.set({ onlineDictionaryUrl: DEFAULT_DICTIONARY_URL });
     }
-    var url = template.replace(/\\{word\\}/g, encodeURIComponent(word))
-      .replace(/\\{source\\}/g, encodeURIComponent(source))
-      .replace(/\\{target\\}/g, encodeURIComponent(target));
+    var url = template.replace(/\{word\}/g, encodeURIComponent(word))
+      .replace(/\{source\}/g, encodeURIComponent(source))
+      .replace(/\{target\}/g, encodeURIComponent(target));
     fetch(url, { headers: { "Accept": "application/json" } }).then(function (response) {
       if (!response.ok) {
         var error = new Error("HTTP " + response.status);
