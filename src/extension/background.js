@@ -8,7 +8,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       sendResponse({ ok: false, error: "آدرس باید جای‌نگهدار {word} داشته باشد." });
       return;
     }
-    var url = template.replace(/\\{word\\}/g, encodeURIComponent(message.word));
+    var url = template.replace(/\{word\}/g, encodeURIComponent(message.word));
     fetch(url, { headers: { "Accept": "application/json" } }).then(function (response) {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
@@ -16,7 +16,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       var meaning = data && data.responseData && data.responseData.translatedText;
       if (!meaning && data) meaning = data.meaning || data.translation || data.translatedText;
       if (typeof meaning !== "string" || !meaning.trim()) {
-        sendResponse({ ok: false, error: "پاسخ سرویس معنی قابل‌خواندن نداشت. سرویس باید JSON با فیلد meaning یا responseData.translatedText برگرداند." });
+        sendResponse({ ok: false, error: "پاسخ سرویس معنی قابل‌خواندن نداشت. JSON باید فیلد meaning یا responseData.translatedText داشته باشد." });
         return;
       }
       sendResponse({ ok: true, word: message.word, meaning: meaning.trim() });
