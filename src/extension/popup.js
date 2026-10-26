@@ -39,7 +39,8 @@ document.addEventListener("DOMContentLoaded", function () {
         result.textContent = "اجازهٔ دسترسی به این سرویس داده نشد.";
         return;
       }
-      chrome.runtime.sendMessage({ type: "ONLINE_LOOKUP", word: word }, function (response) {
+      chrome.storage.local.set({ onlineDictionaryUrl: urlText }, function () {
+        chrome.runtime.sendMessage({ type: "ONLINE_LOOKUP", word: word }, function (response) {
         if (chrome.runtime.lastError) {
           result.textContent = "خطا در ارتباط با افزونهٔ پس‌زمینه: " + chrome.runtime.lastError.message;
           return;
@@ -52,6 +53,7 @@ document.addEventListener("DOMContentLoaded", function () {
         currentMeaning = response.meaning;
         result.textContent = "معنی آنلاین: " + currentMeaning;
         saveWord.disabled = false;
+        });
       });
     });
   }
