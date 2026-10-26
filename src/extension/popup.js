@@ -3,15 +3,17 @@ var DEFAULT_URL = "https://api.mymemory.translated.net/get?q={word}&langpair=en|
 document.addEventListener("DOMContentLoaded", function () {
   var status = document.getElementById("status");
   var toggle = document.getElementById("toggle");
+  var modeToggle = document.getElementById("mode-toggle");
+  var modeHelp = document.getElementById("mode-help");
   var wordInput = document.getElementById("word");
-  var lookupOffline = document.getElementById("lookup-offline");
-  var lookupOnline = document.getElementById("lookup-online");
+  var lookup = document.getElementById("lookup");
   var result = document.getElementById("result");
   var saveWord = document.getElementById("save-word");
   var endpoint = document.getElementById("endpoint");
   var saveEndpoint = document.getElementById("save-endpoint");
   var currentWord = "";
   var currentMeaning = "";
+  var dictionaryMode = "online";
   var offline = {};
   var offlineLoaded = false;
 
@@ -19,6 +21,15 @@ document.addEventListener("DOMContentLoaded", function () {
     status.textContent = enabled ? "وضعیت: افزونه فعال است." : "وضعیت: افزونه خاموش است.";
     toggle.textContent = enabled ? "خاموش کردن افزونه" : "فعال کردن افزونه";
     toggle.setAttribute("aria-pressed", enabled ? "true" : "false");
+  }
+
+  function renderMode() {
+    var online = dictionaryMode === "online";
+    modeToggle.textContent = online ? "حالت دیکشنری: آنلاین" : "حالت دیکشنری: آفلاین";
+    modeToggle.setAttribute("aria-pressed", online ? "true" : "false");
+    modeHelp.textContent = online
+      ? "حالت آنلاین: معنی از آدرس پیش‌فرض یا آدرس ذخیره‌شده گرفته می‌شود."
+      : "حالت آفلاین: فقط معنی‌های موجود در دیکشنری ذخیره‌شده خوانده می‌شوند.";
   }
 
   function getHostPattern(urlText) {
@@ -43,12 +54,10 @@ document.addEventListener("DOMContentLoaded", function () {
     currentWord = word;
     currentMeaning = meaning;
     result.textContent = (source === "online" ? "معنی آنلاین: " : "معنی آفلاین: ") + meaning;
-    saveWord.disabled = false;
+    saveWord.disabled = source !== "online";
   }
 
-  function lookupOfflineWord() {
-    var word = validWord();
-    if (!word) return;
+  function lookupOfflineWord(word) {
     if (!offlineLoaded) {
       result.textContent = "واژه‌نامهٔ آفلاین هنوز در حال بارگذاری است؛ یک لحظه دیگر امتحان کن.";
       return;
@@ -59,13 +68,11 @@ document.addEventListener("DOMContentLoaded", function () {
       currentWord = word;
       currentMeaning = "";
       saveWord.disabled = true;
-      result.textContent = "این کلمه در دیکشنری آفلاین نیست. دکمهٔ جست‌وجوی آنلاین را بزن.";
+      result.textContent = "این کلمه در دیکشنری آفلاین نیست. حالت دیکشنری را روی آنلاین بگذار.";
     }
   }
 
-  function lookupOnlineWord() {
-    var word = validWord();
-    if (!word) return;
+  function lookupOnlineWord(word) {
     var urlText = endpoint.value.trim() || DEFAULT_URL;
     var pattern = getHostPattern(urlText);
     if (!pattern || urlText.indexOf("{word}") === -1) {
@@ -98,9 +105,22 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  chrome.storage.local.get({ textTranslatorEnabled: true, onlineDictionaryUrl: DEFAULT_URL }, function (data) {
+  function runLookup() {
+    var word = validWord();
+    if (!word) return;
+    if (dictionaryMode === "online") lookupOnlineWord(word);
+    else lookupOfflineWord(word);
+  }
+
+  chrome.storage.local.get({
+    textTranslatorEnabled: true,
+    onlineDictionaryUrl: DEFAULT_URL,
+    dictionaryMode: "online"
+  }, function (data) {
     render(data.textTranslatorEnabled !== false);
     endpoint.value = data.onlineDictionaryUrl || DEFAULT_URL;
+    dictionaryMode = data.dictionaryMode === "offline" ? "offline" : "online";
+    renderMode();
   });
 
   function loadOffline() {
@@ -137,10 +157,21 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  lookupOffline.addEventListener("click", lookupOfflineWord);
-  lookupOnline.addEventListener("click", lookupOnlineWord);
+  modeToggle.addEventListener("click", function () {
+    dictionaryMode = dictionaryMode === "online" ? "offline" : "online";
+    chrome.storage.local.set({ dictionaryMode: dictionaryMode }, function () {
+      renderMode();
+      result.textContent = dictionaryMode === "online"
+        ? "حالت آنلاین فعال شد؛ کلمه را وارد کن و «پیدا کردن معنی» را بزن."
+        : "حالت آفلاین فعال شد؛ کلمه را وارد کن و «پیدا کردن معنی» را بزن.";
+      currentMeaning = "";
+      saveWord.disabled = true;
+    });
+  });
+
+  lookup.addEventListener("click", runLookup);
   wordInput.addEventListener("keydown", function (event) {
-    if (event.key === "Enter") lookupOfflineWord();
+    if (event.key === "Enter") runLookup();
   });
 
   saveWord.addEventListener("click", function () {
