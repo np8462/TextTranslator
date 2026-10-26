@@ -8,7 +8,6 @@
   var cardTimer = null;
   var displayDurationSeconds = 2;
   var requestId = 0;
-  var baseDictionary = {};
   var dictionary = {};
   var customDictionaries = {};
   var seedDictionaries = {};
@@ -18,9 +17,6 @@
     dictionary = {};
     var seeded = seedDictionaries[pairKey()] || {};
     Object.keys(seeded).forEach(function (key) { dictionary[key.toLowerCase()] = seeded[key]; });
-    if (sourceLanguage === "en" && targetLanguage === "fa") {
-      Object.keys(baseDictionary).forEach(function (key) { dictionary[key.toLowerCase()] = baseDictionary[key]; });
-    }
     var saved = customDictionaries[pairKey()] || {};
     Object.keys(saved).forEach(function (key) { if (typeof saved[key] === "string") dictionary[key.toLowerCase()] = saved[key]; });
   }
@@ -41,11 +37,6 @@
     });
   }
   loadPairDictionary();
-  fetch(chrome.runtime.getURL("dictionary.json")).then(function (response) { return response.json(); })
-    .then(function (data) {
-      Object.keys(data || {}).forEach(function (key) { if (typeof data[key] === "string") baseDictionary[key.toLowerCase()] = data[key]; });
-      rebuildDictionary();
-    }).catch(function () {});
   chrome.storage.local.get({
     textTranslatorEnabled: true, dictionaryMode: "online", sourceLanguage: "en",
     targetLanguage: "fa", customDictionaries: {}, customDictionary: {}, tooltipDurationSeconds: 2
