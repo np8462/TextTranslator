@@ -6,22 +6,32 @@
 <p id="status" role="status">در حال بررسی وضعیت...</p>
 <button id="toggle" type="button">...</button>
 <section class="panel">
-<h2>حالت دیکشنری</h2>
+<h2>تنظیم زبان و حالت</h2>
+<label for="source-language">زبان مبدأ (زبان واژه)</label>
+<select id="source-language">
+<option value="en">انگلیسی</option><option value="de">آلمانی</option><option value="fr">فرانسوی</option><option value="es">اسپانیایی</option><option value="it">ایتالیایی</option><option value="tr">ترکی</option><option value="ar">عربی</option><option value="ru">روسی</option><option value="ja">ژاپنی</option><option value="zh-CN">چینی ساده‌شده</option><option value="fa">فارسی</option>
+</select>
+<label for="target-language">زبان مقصد (معنی)</label>
+<select id="target-language">
+<option value="fa">فارسی</option><option value="en">انگلیسی</option><option value="de">آلمانی</option><option value="fr">فرانسوی</option><option value="es">اسپانیایی</option><option value="it">ایتالیایی</option><option value="tr">ترکی</option><option value="ar">عربی</option><option value="ru">روسی</option><option value="ja">ژاپنی</option><option value="zh-CN">چینی ساده‌شده</option>
+</select>
+<button id="save-languages" type="button">اعمال زبان‌ها</button>
+<p id="language-help" class="note">هر جفت‌زبان واژه‌های ذخیره‌شدهٔ جداگانه دارد. دیکشنری پایهٔ فعلی برای انگلیسی به فارسی است.</p>
 <button id="mode-toggle" type="button" aria-pressed="true">حالت دیکشنری: آنلاین</button>
-<p id="mode-help">در حالت آنلاین، معنی از آدرس پیش‌فرض دیکشنری گرفته می‌شود؛ در حالت آفلاین فقط واژه‌های ذخیره‌شده استفاده می‌شوند.</p>
-<label for="word">کلمهٔ انگلیسی</label>
-<input id="word" type="text" maxlength="40" placeholder="مثلاً: apple" dir="ltr">
+<p id="mode-help">حالت انتخاب‌شده هم در این پنجره و هم هنگام هایلایت کلمات استفاده می‌شود.</p>
+<label for="word">واژه برای جست‌وجو</label>
+<input id="word" type="text" maxlength="40" placeholder="مثلاً: apple" dir="auto">
 <button id="lookup" type="button">پیدا کردن معنی</button>
-<p id="result" role="status">یک کلمه وارد کن و «پیدا کردن معنی» را بزن.</p>
-<button id="save-word" class="add-word" type="button" disabled><span aria-hidden="true">＋</span> افزودن معنی به دیکشنری آفلاین</button>
+<p id="result" role="status">یک واژه وارد کن و «پیدا کردن معنی» را بزن.</p>
+<button id="save-word" class="add-word" type="button" disabled><span aria-hidden="true">＋</span> افزودن معنی به دیکشنری آفلاین همین جفت‌زبان</button>
 </section>
 <section class="panel">
 <h2>تنظیم دیکشنری آنلاین</h2>
-<label for="endpoint">آدرس سرویس (باید شامل {word} باشد)</label>
+<label for="endpoint">آدرس سرویس (باید {word}، {source} و {target} را پشتیبانی کند)</label>
 <input id="endpoint" type="text" dir="ltr">
 <button id="save-endpoint" type="button">ذخیرهٔ آدرس آنلاین</button>
-<p class="note">آدرس پیش‌فرض، سرویس ترجمهٔ انگلیسی به فارسی است. چون ترجمهٔ ماشینی ممکن است نام برند را با معنی واژه اشتباه بگیرد، نتیجهٔ کلمات چندمعنا همیشه نیاز به بررسی دارد.</p>
+<p class="note">آدرس پیش‌فرض از رابط عمومی و غیررسمی ترجمهٔ گوگل استفاده می‌کند؛ تضمین پایداری یا پشتیبانی رسمی ندارد. API رسمی Google Cloud Translation نیازمند تنظیمات و احتمالاً هزینه است.</p>
 </section>
 <section class="help"><h2>راهنمای استفاده</h2>
-<ol><li>حالت دیکشنری را با یک دکمه بین آنلاین و آفلاین عوض کن.</li><li>در حالت آنلاین، معنی از آدرس ذخیره‌شده گرفته می‌شود.</li><li>پس از پیدا شدن معنی آنلاین، دکمهٔ ＋ را بزن تا برای استفادهٔ آفلاین ذخیره شود.</li></ol></section>
+<ol><li>زبان مبدأ و مقصد را انتخاب و «اعمال زبان‌ها» را بزن.</li><li>حالت آنلاین یا آفلاین را انتخاب کن؛ همین حالت برای کلمات هایلایت‌شده نیز استفاده می‌شود.</li><li>در حالت آنلاین، معنی را جست‌وجو کن و با ＋ در دیکشنری آفلاین همان جفت‌زبان ذخیره کن.</li></ol></section>
 </main><script src="popup.js"></script></body></html>
