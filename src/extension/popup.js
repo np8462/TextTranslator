@@ -22,23 +22,35 @@ document.addEventListener("DOMContentLoaded", function () {
   var importDictionary = document.getElementById("import-dictionary");
   var checkDictionary = document.getElementById("check-dictionary");
   var updateDictionary = document.getElementById("update-dictionary");
-  var dictionarySourceSelect = document.getElementById("dictionary-source-language");
-  var dictionaryTargetSelect = document.getElementById("dictionary-target-language");
-  var dictionaryPairHelp = document.getElementById("dictionary-pair-help");
+  var exportPairSelect = document.getElementById("export-pair");
+
   var currentWord = "";
   var currentMeaning = "";
   var dictionaryMode = "online";
   var sourceLanguage = "en";
   var targetLanguage = "fa";
-  var dictionarySourceLanguage = "en";
-  var dictionaryTargetLanguage = "fa";
   var offline = {};
   var offlineLoaded = false;
 
   function pairKey() { return sourceLanguage + "-" + targetLanguage; }
-  function managementPairKey() { return dictionarySourceLanguage + "-" + dictionaryTargetLanguage; }
-  function renderManagementPair() {
-    dictionaryPairHelp.textContent = "جفت‌زبان مدیریت دیکشنری: " + LANGUAGE_NAMES[dictionarySourceLanguage] + " ← " + LANGUAGE_NAMES[dictionaryTargetLanguage] + ". این انتخاب از زبان‌های جست‌وجو و هایلایت مستقل است.";
+  var SUPPORTED_PAIRS = ["en-fa","fa-en","de-fa","fa-de","fr-fa","fa-fr","es-fa","fa-es","it-fa","fa-it","el-fa","fa-el","tr-fa","fa-tr","ar-fa","fa-ar","ru-fa","fa-ru","ja-fa","fa-ja","zh-CN-fa","fa-zh-CN"];
+  function pairFromMetadata(parsed) {
+    if (parsed && parsed.sourceLanguage && parsed.targetLanguage) {
+      var key = parsed.sourceLanguage + "-" + parsed.targetLanguage;
+      if (SUPPORTED_PAIRS.indexOf(key) >= 0) return key;
+    }
+    return "";
+  }
+  function pairFromFile(file, parsed) {
+    var fromMetadata = pairFromMetadata(parsed);
+    if (fromMetadata) return fromMetadata;
+    var name = String(file && file.name || "").replace(/\\.json$/i, "").toLowerCase();
+    var pairs = SUPPORTED_PAIRS.slice(0).sort(function (a, b) { return b.length - a.length; });
+    for (var i = 0; i < pairs.length; i++) {
+      var candidate = pairs[i].toLowerCase();
+      if (name === candidate || name.slice(-(candidate.length + 1)) === "-" + candidate || name.slice(-(candidate.length + 1)) === "_" + candidate) return pairs[i];
+    }
+    return "";
   }
   function loadDictionaryForPair(key, callback) {
     var combined = {};
@@ -184,9 +196,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     var entries = parsed;
     if (parsed && typeof parsed === "object" && parsed.entries && typeof parsed.entries === "object" && !Array.isArray(parsed.entries)) {
-      if (parsed.sourceLanguage && parsed.targetLanguage &&
+      if (expectedPair && parsed.sourceLanguage && parsed.targetLanguage &&
           parsed.sourceLanguage + "-" + parsed.targetLanguage !== expectedPair) {
-        return { ok: false, error: "جفت‌زبان فایل (" + parsed.sourceLanguage + "-" + parsed.targetLanguage + ") با جفت‌زبان انتخاب‌شده (" + expectedPair + ") یکسان نیست." };
+        return { ok: false, error: "جفت‌زبان فایل (" + parsed.sourceLanguage + "-" + parsed.targetLanguage + ") با جفت‌زبان مورد انتظار (" + expectedPair + ") یکسان نیست." };
       }
       entries = parsed.entries;
     }
@@ -204,55 +216,96 @@ document.addEventListener("DOMContentLoaded", function () {
     return { ok: issues.length === 0, entries: entries, count: keys.length, issues: issues, duplicateKeys: duplicateKeys };
   }
 
-  function readSelectedFile(callback) {
-    var file = importFile.files && importFile.files[0];
-    if (!file) { dictionaryToolsResult.textContent = "ابتدا یک فایل JSON انتخاب کن."; return; }
-    var reader = new FileReader();
-    reader.onload = function () { callback(String(reader.result || "")); };
-    reader.onerror = function () { dictionaryToolsResult.textContent = "خواندن فایل ناموفق بود."; };
-    reader.readAsText(file, "UTF-8");
+  function readSelectedFiles(files, callback) {
+    var selected = Array.prototype.slice.call(files || []);
+    if (!selected.length) { dictionaryToolsResult.textContent = "ابتدا یک یا چند فایل JSON انتخاب کن."; return; }
+    var results = [], index = 0;
+    function next() {
+      if (index >= selected.length) { callback(results); return; }
+      var file = selected[index++], reader = new FileReader();
+      reader.onload = function () {
+        var rawText = String(reader.result || ""), parsed = null;
+        try { parsed = JSON.parse(rawText); } catch (ignore) {}
+        results.push({ file: file, rawText: rawText, parsed: parsed });
+        next();
+      };
+      reader.onerror = function () {
+        results.push({ file: file, rawText: "", parsed: null, readError: true });
+        next();
+      };
+      reader.readAsText(file, "UTF-8");
+    }
+    next();
   }
 
   exportDictionary.addEventListener("click", function () {
-    if (!offlineLoaded) { dictionaryToolsResult.textContent = "دیکشنری هنوز بارگذاری نشده؛ کمی صبر کن."; return; }
-    var payload = { format: "texttranslator-dictionary", version: 1, sourceLanguage: sourceLanguage,
-      targetLanguage: targetLanguage, exportedAt: new Date().toISOString(), entries: offline };
-    var blob = new Blob([JSON.stringify(payload, null, 2) + "\n"], { type: "application/json;charset=utf-8" });
-    var url = URL.createObjectURL(blob), anchor = document.createElement("a");
-    anchor.href = url; anchor.download = "texttranslator-" + pairKey() + ".json";
-    document.body.appendChild(anchor); anchor.click(); anchor.remove();
-    window.setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-    dictionaryToolsResult.textContent = "خروجی " + Object.keys(offline).length + " واژه از جفت‌زبان " + pairKey() + " آماده شد.";
+    var key = exportPairSelect.value;
+    if (SUPPORTED_PAIRS.indexOf(key) < 0) { dictionaryToolsResult.textContent = "یک جفت‌زبان معتبر برای خروجی انتخاب کن."; return; }
+    loadDictionaryForPair(key, function (entries) {
+      var parts = key.split("-");
+      var source = "", target = "";
+      var codes = ["zh-CN","en","de","fr","es","it","el","tr","ar","ru","ja","fa"];
+      for (var i = 0; i < codes.length; i++) {
+        if (key.indexOf(codes[i] + "-") === 0) { source = codes[i]; target = key.slice(codes[i].length + 1); break; }
+      }
+      var payload = { format: "texttranslator-dictionary", version: 1, sourceLanguage: source,
+        targetLanguage: target, exportedAt: new Date().toISOString(), entries: entries };
+      var blob = new Blob([JSON.stringify(payload, null, 2) + "\n"], { type: "application/json;charset=utf-8" });
+      var url = URL.createObjectURL(blob), anchor = document.createElement("a");
+      anchor.href = url; anchor.download = "texttranslator-" + key + ".json";
+      document.body.appendChild(anchor); anchor.click(); anchor.remove();
+      window.setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      dictionaryToolsResult.textContent = "خروجی " + Object.keys(entries).length + " واژه از " + key + " آماده شد. محل ذخیره را از پنجرهٔ دانلود مرورگر یا تنظیمات Chrome تعیین کن.";
+    });
   });
 
   checkDictionary.addEventListener("click", function () {
-    if (!offlineLoaded) { dictionaryToolsResult.textContent = "دیکشنری هنوز بارگذاری نشده؛ کمی صبر کن."; return; }
-    var report = validateDictionaryText(JSON.stringify(offline), pairKey());
-    dictionaryToolsResult.textContent = report.ok
-      ? "بررسی موفق: " + report.count + " واژه، معنی‌های متنی و غیرخالی، بدون کلید تکراری."
-      : "موارد نیازمند اصلاح: " + report.issues.join("؛ ");
+    readSelectedFiles(importFile.files, function (files) {
+      var messages = [];
+      files.forEach(function (item) {
+        if (item.readError) { messages.push(item.file.name + ": خواندن فایل ناموفق بود."); return; }
+        var key = pairFromFile(item.file, item.parsed);
+        var report = validateDictionaryText(item.rawText, key || null);
+        messages.push(item.file.name + ": " + (report.ok
+          ? "معتبر، " + report.count + " واژه" + (key ? "، جفت‌زبان " + key : "، جفت‌زبان از نام/فراداده تشخیص داده نشد")
+          : "نامعتبر؛ " + (report.error || report.issues.join("؛ "))));
+      });
+      dictionaryToolsResult.textContent = messages.join(" | ");
+    });
   });
 
   importDictionary.addEventListener("click", function () {
-    readSelectedFile(function (rawText) {
-      var key = managementPairKey();
-      var report = validateDictionaryText(rawText, key);
-      if (!report.ok) {
-        dictionaryToolsResult.textContent = "فایل وارد نشد. " + (report.error || report.issues.join("؛ "));
+    readSelectedFiles(importFile.files, function (files) {
+      var allReports = [], importable = [];
+      files.forEach(function (item) {
+        if (item.readError) { allReports.push(item.file.name + ": خطای خواندن"); return; }
+        var key = pairFromFile(item.file, item.parsed);
+        if (!key) { allReports.push(item.file.name + ": جفت‌زبان تشخیص داده نشد؛ نام فایل را مثل en-fa.json بگذار یا فرادادهٔ زبان داشته باشد."); return; }
+        var report = validateDictionaryText(item.rawText, key);
+        if (!report.ok) { allReports.push(item.file.name + ": رد شد؛ " + (report.error || report.issues.join("؛ "))); return; }
+        importable.push({ file: item.file, key: key, entries: report.entries });
+      });
+      if (!importable.length) {
+        dictionaryToolsResult.textContent = allReports.join(" | ") || "هیچ فایل معتبری برای واردکردن پیدا نشد.";
         return;
       }
-      var imported = report.entries;
       chrome.storage.local.get({ customDictionaries: {} }, function (saved) {
-        var all = saved.customDictionaries || {}, existing = all[key] || {}, added = 0, conflicts = 0;
-        Object.keys(imported).forEach(function (word) {
-          var normalized = word.trim().toLowerCase(), meaning = imported[word];
-          if (Object.prototype.hasOwnProperty.call(existing, normalized)) { conflicts++; return; }
-          existing[normalized] = meaning.trim(); added++;
+        var all = saved.customDictionaries || {}, added = 0, updated = 0, total = 0;
+        importable.forEach(function (item) {
+          var existing = all[item.key] || {};
+          Object.keys(item.entries).forEach(function (word) {
+            var normalized = word.trim().toLowerCase(), meaning = item.entries[word].trim();
+            if (Object.prototype.hasOwnProperty.call(existing, normalized)) updated++;
+            else added++;
+            existing[normalized] = meaning;
+            total++;
+          });
+          all[item.key] = existing;
+          allReports.push(item.file.name + " → " + item.key + " (" + Object.keys(item.entries).length + " واژه)");
         });
-        all[key] = existing;
         chrome.storage.local.set({ customDictionaries: all }, function () {
           loadOffline();
-          dictionaryToolsResult.textContent = "واردکردن موفق: " + added + " واژهٔ تازه اضافه شد؛ " + conflicts + " واژهٔ هم‌نام موجود حفظ شد. جفت‌زبان مقصد: " + key + ".";
+          dictionaryToolsResult.textContent = "Import تمام شد: " + importable.length + " فایل، " + added + " واژهٔ تازه، " + updated + " واژهٔ به‌روزشده. " + allReports.join(" | ");
         });
       });
     });
@@ -260,50 +313,54 @@ document.addEventListener("DOMContentLoaded", function () {
 
   updateDictionary.addEventListener("click", function () {
     updateDictionary.disabled = true;
-    dictionaryToolsResult.textContent = "در حال بررسی مخزن به‌روزرسانی...";
+    dictionaryToolsResult.textContent = "در حال بررسی همهٔ بسته‌های به‌روزرسانی...";
     fetch(UPDATE_MANIFEST_URL, { cache: "no-store" }).then(function (response) {
       if (!response.ok) throw new Error("فهرست به‌روزرسانی HTTP " + response.status);
       return response.json();
     }).then(function (manifest) {
-      var pair = managementPairKey(), info = manifest && manifest.pairs && manifest.pairs[pair];
-      if (!info || !info.file || !Number(info.version)) throw new Error("فعلاً به‌روزرسانی منتشرشده‌ای برای جفت‌زبان " + pair + " وجود ندارد.");
       chrome.storage.local.get({ dictionaryUpdateVersions: {}, updatedDictionaries: {} }, function (saved) {
-        var versions = saved.dictionaryUpdateVersions || {}, oldVersion = Number(versions[pair] || 0);
-        if (Number(info.version) <= oldVersion) {
-          dictionaryToolsResult.textContent = "این جفت‌زبان از قبل به‌روز است (نسخهٔ " + oldVersion + ").";
-          updateDictionary.disabled = false;
-          return;
+        var versions = saved.dictionaryUpdateVersions || {};
+        var allUpdates = saved.updatedDictionaries || {};
+        var pairs = Object.keys(manifest && manifest.pairs || {});
+        var changed = [], skipped = [], failures = [];
+        function processPair(index) {
+          if (index >= pairs.length) {
+            chrome.storage.local.set({ updatedDictionaries: allUpdates, dictionaryUpdateVersions: versions }, function () {
+              loadOffline();
+              dictionaryToolsResult.textContent = changed.length
+                ? "به‌روزرسانی انجام شد: " + changed.join("؛ ") + (skipped.length ? " | بدون تغییر: " + skipped.join("، ") : "") + (failures.length ? " | خطا: " + failures.join("؛ ") : "") + ". واژه‌های شخصی حفظ شدند."
+                : "بستهٔ تازه‌ای برای دریافت نبود." + (skipped.length ? " نسخه‌های فعلی: " + skipped.join("، ") : "") + (failures.length ? " | خطا: " + failures.join("؛ ") : "");
+              updateDictionary.disabled = false;
+            });
+            return;
+          }
+          var pair = pairs[index], info = manifest.pairs[pair], oldVersion = Number(versions[pair] || 0);
+          if (!info || !info.file || !Number(info.version)) { failures.push(pair + ": اطلاعات بسته نامعتبر است"); processPair(index + 1); return; }
+          if (Number(info.version) <= oldVersion) { skipped.push(pair + " نسخهٔ " + oldVersion); processPair(index + 1); return; }
+          fetch(new URL(info.file, UPDATE_MANIFEST_URL).toString(), { cache: "no-store" }).then(function (response) {
+            if (!response.ok) throw new Error("HTTP " + response.status);
+            return response.text();
+          }).then(function (rawText) {
+            var report = validateDictionaryText(rawText, pair);
+            if (!report.ok) throw new Error(report.error || report.issues.join("؛ "));
+            var pairUpdates = allUpdates[pair] || {};
+            Object.keys(report.entries).forEach(function (word) { pairUpdates[word.trim().toLowerCase()] = report.entries[word].trim(); });
+            allUpdates[pair] = pairUpdates;
+            versions[pair] = Number(info.version);
+            changed.push(pair + " نسخهٔ " + info.version + " (" + report.count + " واژه)");
+          }).catch(function (error) { failures.push(pair + ": " + error.message); }).then(function () { processPair(index + 1); });
         }
-        var fileUrl = new URL(info.file, UPDATE_MANIFEST_URL).toString();
-        fetch(fileUrl, { cache: "no-store" }).then(function (response) {
-          if (!response.ok) throw new Error("فایل واژه‌ها HTTP " + response.status);
-          return response.text();
-        }).then(function (rawText) {
-          var report = validateDictionaryText(rawText, pair);
-          if (!report.ok) throw new Error("بررسی کیفیت به‌روزرسانی رد شد: " + (report.error || report.issues.join("؛ ")));
-          var allUpdates = saved.updatedDictionaries || {}, pairUpdates = allUpdates[pair] || {};
-          Object.keys(report.entries).forEach(function (word) { pairUpdates[word.trim().toLowerCase()] = report.entries[word].trim(); });
-          allUpdates[pair] = pairUpdates;
-          versions[pair] = Number(info.version);
-          chrome.storage.local.set({ updatedDictionaries: allUpdates, dictionaryUpdateVersions: versions }, function () {
-            loadOffline();
-            dictionaryToolsResult.textContent = "به‌روزرسانی موفق: نسخهٔ " + info.version + " برای " + pair + "؛ " + report.count + " واژه بررسی شد. واژه‌های شخصی شما حفظ شدند.";
-            updateDictionary.disabled = false;
-          });
-        }).catch(function (error) {
-          dictionaryToolsResult.textContent = "به‌روزرسانی انجام نشد: " + error.message;
-          updateDictionary.disabled = false;
-        });
+        processPair(0);
       });
     }).catch(function (error) {
-      dictionaryToolsResult.textContent = "دریافت به‌روزرسانی ناموفق بود: " + error.message;
+      dictionaryToolsResult.textContent = "دریافت فهرست به‌روزرسانی ناموفق بود: " + error.message;
       updateDictionary.disabled = false;
     });
   });
 
   chrome.storage.local.get({
     textTranslatorEnabled: true, onlineDictionaryUrl: DEFAULT_URL, dictionaryMode: "online",
-    sourceLanguage: "en", targetLanguage: "fa", managementSourceLanguage: "en", managementTargetLanguage: "fa", tooltipDurationSeconds: 2
+    sourceLanguage: "en", targetLanguage: "fa", tooltipDurationSeconds: 2
   }, function (data) {
     render(data.textTranslatorEnabled !== false);
     endpoint.value = normalizeEndpoint(data.onlineDictionaryUrl || DEFAULT_URL);
@@ -312,23 +369,10 @@ document.addEventListener("DOMContentLoaded", function () {
     sourceLanguage = LANGUAGE_NAMES[data.sourceLanguage] ? data.sourceLanguage : "en";
     targetLanguage = LANGUAGE_NAMES[data.targetLanguage] ? data.targetLanguage : "fa";
     sourceSelect.value = sourceLanguage; targetSelect.value = targetLanguage;
-    dictionarySourceLanguage = LANGUAGE_NAMES[data.managementSourceLanguage] ? data.managementSourceLanguage : "en";
-    dictionaryTargetLanguage = LANGUAGE_NAMES[data.managementTargetLanguage] ? data.managementTargetLanguage : "fa";
-    dictionarySourceSelect.value = dictionarySourceLanguage; dictionaryTargetSelect.value = dictionaryTargetLanguage;
-    renderManagementPair();
+    exportPairSelect.value = "en-fa";
     displayDuration.value = String(Number(data.tooltipDurationSeconds) >= 1 && Number(data.tooltipDurationSeconds) <= 60 ? Math.floor(Number(data.tooltipDurationSeconds)) : 2);
     renderMode(); loadOffline();
   });
-
-  function saveManagementPair() {
-    dictionarySourceLanguage = dictionarySourceSelect.value;
-    dictionaryTargetLanguage = dictionaryTargetSelect.value;
-    renderManagementPair();
-    chrome.storage.local.set({ managementSourceLanguage: dictionarySourceLanguage, managementTargetLanguage: dictionaryTargetLanguage });
-    dictionaryToolsResult.textContent = "جفت‌زبان مدیریت روی " + managementPairKey() + " تنظیم شد. زبان‌های جست‌وجو و هایلایت تغییر نکردند.";
-  }
-  dictionarySourceSelect.addEventListener("change", saveManagementPair);
-  dictionaryTargetSelect.addEventListener("change", saveManagementPair);
 
   toggle.addEventListener("click", function () {
     chrome.storage.local.get({ textTranslatorEnabled: true }, function (data) {
