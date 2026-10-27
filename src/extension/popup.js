@@ -129,6 +129,8 @@ document.addEventListener("DOMContentLoaded", function () {
           dictionaries["en-fa"] = saved.customDictionary;
           chrome.storage.local.set({ customDictionaries: dictionaries });
         }
+        var updatedWords = (saved.updatedDictionaries || {})[key] || {};
+        Object.keys(updatedWords).forEach(function (word) { if (typeof updatedWords[word] === "string") offline[word.toLowerCase()] = updatedWords[word]; });
         var pairWords = dictionaries[key] || {};
         Object.keys(pairWords).forEach(function (word) {
           if (typeof pairWords[word] === "string") offline[word.toLowerCase()] = pairWords[word];
@@ -145,7 +147,7 @@ document.addEventListener("DOMContentLoaded", function () {
     catch (e) { return { ok: false, error: "JSON معتبر نیست: " + e.message }; }
     var duplicateKeys = [];
     var seen = {};
-    var keyPattern = /("(?:\\\\.|[^"\\\\])*")\\s*:/g;
+    var keyPattern = /("(?:\\.|[^"\\])*")\s*:/g;
     var match;
     while ((match = keyPattern.exec(rawText)) !== null) {
       try {
@@ -170,7 +172,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (key.length > 80) issues.push("کلید بیش از ۸۰ نویسه دارد: " + key.slice(0, 20));
       if (typeof entries[key] !== "string" || !entries[key].trim()) issues.push("معنی خالی یا غیرمتنی برای: " + key);
       else if (entries[key].length > 500) issues.push("معنی بیش از ۵۰۰ نویسه دارد: " + key);
-      if (/\\s{2,}/.test(key)) issues.push("فاصلهٔ تکراری در کلید: " + key);
+      if (/\s{2,}/.test(key)) issues.push("فاصلهٔ تکراری در کلید: " + key);
     });
     if (duplicateKeys.length) issues.push("کلید تکراری در متن JSON: " + duplicateKeys.join("، "));
     return { ok: issues.length === 0, entries: entries, count: keys.length, issues: issues, duplicateKeys: duplicateKeys };
@@ -189,7 +191,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!offlineLoaded) { dictionaryToolsResult.textContent = "دیکشنری هنوز بارگذاری نشده؛ کمی صبر کن."; return; }
     var payload = { format: "texttranslator-dictionary", version: 1, sourceLanguage: sourceLanguage,
       targetLanguage: targetLanguage, exportedAt: new Date().toISOString(), entries: offline };
-    var blob = new Blob([JSON.stringify(payload, null, 2) + "\\n"], { type: "application/json;charset=utf-8" });
+    var blob = new Blob([JSON.stringify(payload, null, 2) + "\n"], { type: "application/json;charset=utf-8" });
     var url = URL.createObjectURL(blob), anchor = document.createElement("a");
     anchor.href = url; anchor.download = "texttranslator-" + pairKey() + ".json";
     document.body.appendChild(anchor); anchor.click(); anchor.remove();
