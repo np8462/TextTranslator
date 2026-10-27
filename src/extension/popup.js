@@ -16,6 +16,12 @@ document.addEventListener("DOMContentLoaded", function () {
   var endpoint = document.getElementById("endpoint");
   var saveEndpoint = document.getElementById("save-endpoint");
   var displayDuration = document.getElementById("display-duration");
+  var dictionaryToolsResult = document.getElementById("dictionary-tools-result");
+  var importFile = document.getElementById("import-file");
+  var exportDictionary = document.getElementById("export-dictionary");
+  var importDictionary = document.getElementById("import-dictionary");
+  var checkDictionary = document.getElementById("check-dictionary");
+  var updateDictionary = document.getElementById("update-dictionary");
   var currentWord = "";
   var currentMeaning = "";
   var dictionaryMode = "online";
@@ -116,7 +122,7 @@ document.addEventListener("DOMContentLoaded", function () {
       Object.keys(seeded || {}).forEach(function (word) {
         if (typeof seeded[word] === "string") offline[word.toLowerCase()] = seeded[word];
       });
-      chrome.storage.local.get({ customDictionaries: {}, customDictionary: {} }, function (saved) {
+      chrome.storage.local.get({ customDictionaries: {}, customDictionary: {}, updatedDictionaries: {} }, function (saved) {
         if (key !== pairKey()) return;
         var dictionaries = saved.customDictionaries || {};
         if (!dictionaries["en-fa"] && saved.customDictionary && Object.keys(saved.customDictionary).length) {
@@ -131,6 +137,141 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
   }
+  var UPDATE_MANIFEST_URL = "https://raw.githubusercontent.com/np8462/TextTranslator/test/hover-meaning-prototype/src/extension/dictionary-updates/manifest.json";
+
+  function validateDictionaryText(rawText, expectedPair) {
+    var parsed;
+    try { parsed = JSON.parse(rawText); }
+    catch (e) { return { ok: false, error: "JSON معتبر نیست: " + e.message }; }
+    var duplicateKeys = [];
+    var seen = {};
+    var keyPattern = /("(?:\\\\.|[^"\\\\])*")\\s*:/g;
+    var match;
+    while ((match = keyPattern.exec(rawText)) !== null) {
+      try {
+        var key = JSON.parse(match[1]);
+        if (Object.prototype.hasOwnProperty.call(seen, key)) duplicateKeys.push(key);
+        seen[key] = true;
+      } catch (ignore) {}
+    }
+    var entries = parsed;
+    if (parsed && typeof parsed === "object" && parsed.entries && typeof parsed.entries === "object" && !Array.isArray(parsed.entries)) {
+      if (parsed.sourceLanguage && parsed.targetLanguage &&
+          parsed.sourceLanguage + "-" + parsed.targetLanguage !== expectedPair) {
+        return { ok: false, error: "جفت‌زبان فایل (" + parsed.sourceLanguage + "-" + parsed.targetLanguage + ") با جفت‌زبان انتخاب‌شده (" + expectedPair + ") یکسان نیست." };
+      }
+      entries = parsed.entries;
+    }
+    if (!entries || typeof entries !== "object" || Array.isArray(entries)) return { ok: false, error: "ساختار باید یک شیء JSON از واژه‌ها و معنی‌ها باشد." };
+    var keys = Object.keys(entries), issues = [];
+    if (!keys.length) issues.push("فایل هیچ واژه‌ای ندارد");
+    keys.forEach(function (key) {
+      if (!key.trim()) issues.push("کلید خالی وجود دارد");
+      if (key.length > 80) issues.push("کلید بیش از ۸۰ نویسه دارد: " + key.slice(0, 20));
+      if (typeof entries[key] !== "string" || !entries[key].trim()) issues.push("معنی خالی یا غیرمتنی برای: " + key);
+      else if (entries[key].length > 500) issues.push("معنی بیش از ۵۰۰ نویسه دارد: " + key);
+      if (/\\s{2,}/.test(key)) issues.push("فاصلهٔ تکراری در کلید: " + key);
+    });
+    if (duplicateKeys.length) issues.push("کلید تکراری در متن JSON: " + duplicateKeys.join("، "));
+    return { ok: issues.length === 0, entries: entries, count: keys.length, issues: issues, duplicateKeys: duplicateKeys };
+  }
+
+  function readSelectedFile(callback) {
+    var file = importFile.files && importFile.files[0];
+    if (!file) { dictionaryToolsResult.textContent = "ابتدا یک فایل JSON انتخاب کن."; return; }
+    var reader = new FileReader();
+    reader.onload = function () { callback(String(reader.result || "")); };
+    reader.onerror = function () { dictionaryToolsResult.textContent = "خواندن فایل ناموفق بود."; };
+    reader.readAsText(file, "UTF-8");
+  }
+
+  exportDictionary.addEventListener("click", function () {
+    if (!offlineLoaded) { dictionaryToolsResult.textContent = "دیکشنری هنوز بارگذاری نشده؛ کمی صبر کن."; return; }
+    var payload = { format: "texttranslator-dictionary", version: 1, sourceLanguage: sourceLanguage,
+      targetLanguage: targetLanguage, exportedAt: new Date().toISOString(), entries: offline };
+    var blob = new Blob([JSON.stringify(payload, null, 2) + "\\n"], { type: "application/json;charset=utf-8" });
+    var url = URL.createObjectURL(blob), anchor = document.createElement("a");
+    anchor.href = url; anchor.download = "texttranslator-" + pairKey() + ".json";
+    document.body.appendChild(anchor); anchor.click(); anchor.remove();
+    window.setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    dictionaryToolsResult.textContent = "خروجی " + Object.keys(offline).length + " واژه از جفت‌زبان " + pairKey() + " آماده شد.";
+  });
+
+  checkDictionary.addEventListener("click", function () {
+    if (!offlineLoaded) { dictionaryToolsResult.textContent = "دیکشنری هنوز بارگذاری نشده؛ کمی صبر کن."; return; }
+    var report = validateDictionaryText(JSON.stringify(offline), pairKey());
+    dictionaryToolsResult.textContent = report.ok
+      ? "بررسی موفق: " + report.count + " واژه، معنی‌های متنی و غیرخالی، بدون کلید تکراری."
+      : "موارد نیازمند اصلاح: " + report.issues.join("؛ ");
+  });
+
+  importDictionary.addEventListener("click", function () {
+    readSelectedFile(function (rawText) {
+      var report = validateDictionaryText(rawText, pairKey());
+      if (!report.ok) {
+        dictionaryToolsResult.textContent = "فایل وارد نشد. " + report.issues.join("؛ ");
+        return;
+      }
+      var imported = report.entries;
+      chrome.storage.local.get({ customDictionaries: {} }, function (saved) {
+        var all = saved.customDictionaries || {}, existing = all[pairKey()] || {}, added = 0, conflicts = 0;
+        Object.keys(imported).forEach(function (word) {
+          var normalized = word.trim().toLowerCase(), meaning = imported[word];
+          if (Object.prototype.hasOwnProperty.call(existing, normalized)) { conflicts++; return; }
+          existing[normalized] = meaning.trim(); added++;
+        });
+        all[pairKey()] = existing;
+        chrome.storage.local.set({ customDictionaries: all }, function () {
+          loadOffline();
+          dictionaryToolsResult.textContent = "واردکردن موفق: " + added + " واژهٔ تازه اضافه شد؛ " + conflicts + " واژهٔ هم‌نام موجود حفظ شد. جفت‌زبان: " + pairKey() + ".";
+        });
+      });
+    });
+  });
+
+  updateDictionary.addEventListener("click", function () {
+    updateDictionary.disabled = true;
+    dictionaryToolsResult.textContent = "در حال بررسی مخزن به‌روزرسانی...";
+    fetch(UPDATE_MANIFEST_URL, { cache: "no-store" }).then(function (response) {
+      if (!response.ok) throw new Error("فهرست به‌روزرسانی HTTP " + response.status);
+      return response.json();
+    }).then(function (manifest) {
+      var pair = pairKey(), info = manifest && manifest.pairs && manifest.pairs[pair];
+      if (!info || !info.file || !Number(info.version)) throw new Error("فعلاً به‌روزرسانی منتشرشده‌ای برای جفت‌زبان " + pair + " وجود ندارد.");
+      chrome.storage.local.get({ dictionaryUpdateVersions: {}, updatedDictionaries: {} }, function (saved) {
+        var versions = saved.dictionaryUpdateVersions || {}, oldVersion = Number(versions[pair] || 0);
+        if (Number(info.version) <= oldVersion) {
+          dictionaryToolsResult.textContent = "این جفت‌زبان از قبل به‌روز است (نسخهٔ " + oldVersion + ").";
+          updateDictionary.disabled = false;
+          return;
+        }
+        var fileUrl = new URL(info.file, UPDATE_MANIFEST_URL).toString();
+        fetch(fileUrl, { cache: "no-store" }).then(function (response) {
+          if (!response.ok) throw new Error("فایل واژه‌ها HTTP " + response.status);
+          return response.text();
+        }).then(function (rawText) {
+          var report = validateDictionaryText(rawText, pair);
+          if (!report.ok) throw new Error("بررسی کیفیت به‌روزرسانی رد شد: " + report.issues.join("؛ "));
+          var allUpdates = saved.updatedDictionaries || {}, pairUpdates = allUpdates[pair] || {};
+          Object.keys(report.entries).forEach(function (word) { pairUpdates[word.trim().toLowerCase()] = report.entries[word].trim(); });
+          allUpdates[pair] = pairUpdates;
+          versions[pair] = Number(info.version);
+          chrome.storage.local.set({ updatedDictionaries: allUpdates, dictionaryUpdateVersions: versions }, function () {
+            loadOffline();
+            dictionaryToolsResult.textContent = "به‌روزرسانی موفق: نسخهٔ " + info.version + " برای " + pair + "؛ " + report.count + " واژه بررسی شد. واژه‌های شخصی شما حفظ شدند.";
+            updateDictionary.disabled = false;
+          });
+        }).catch(function (error) {
+          dictionaryToolsResult.textContent = "به‌روزرسانی انجام نشد: " + error.message;
+          updateDictionary.disabled = false;
+        });
+      });
+    }).catch(function (error) {
+      dictionaryToolsResult.textContent = "دریافت به‌روزرسانی ناموفق بود: " + error.message;
+      updateDictionary.disabled = false;
+    });
+  });
+
   chrome.storage.local.get({
     textTranslatorEnabled: true, onlineDictionaryUrl: DEFAULT_URL, dictionaryMode: "online",
     sourceLanguage: "en", targetLanguage: "fa", tooltipDurationSeconds: 2
