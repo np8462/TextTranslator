@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "TextTranslator",
-  "version": "0.6.2",
-  "description": "Multilingual dictionary with pair-specific offline storage and online highlighted-word lookup.",
+  "version": "0.7.0",
+  "description": "Multilingual dictionary with import/export, quality checks, incremental offline updates, and online highlighted-word lookup.",
   "permissions": [
     "storage"
   ],
@@ -40,6 +40,7 @@
   ],
   "host_permissions": [
     "https://translate.googleapis.com/*",
-    "https://api.mymemory.translated.net/*"
+    "https://api.mymemory.translated.net/*",
+    "https://raw.githubusercontent.com/*"
   ]
 }
