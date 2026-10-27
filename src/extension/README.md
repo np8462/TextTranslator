@@ -1,6 +1,6 @@
 # TextTranslator Chrome Extension
 
-**Status:** Local prototype, version 0.7.0. Changes are limited to the test branch; this is not a published Chrome Web Store release.
+**Status:** Local prototype, version 0.7.1. Changes are limited to the test branch; this is not a published Chrome Web Store release.
 
 این افزونه می‌تواند هنگام بردن ماوس روی یک واژه یا انتخاب آن در صفحه، معنی آن را در یک کارت کوچک نشان دهد. حالت آنلاین/آفلاین و جفت‌زبان انتخاب‌شده در پنجرهٔ افزونه برای کلمات هایلایت‌شده نیز اعمال می‌شود.
 
@@ -9,6 +9,7 @@
 - Separate source and target language selectors: English, German, French, Spanish, Italian, Greek, Turkish, Arabic, Russian, Japanese, Simplified Chinese, and Persian.
 - Separate local saved dictionary for each language pair (for example, \`en-fa\` and \`de-fa\`).
 - Import/export personal dictionaries as pair-tagged JSON files; imported files are validated before saving, and existing personal entries are kept when names conflict.
+- Dictionary-management source/target selectors are independent from the active lookup/highlight languages. Import, export, quality checks, and remote updates use the explicitly selected management pair.
 - Dictionary quality check validates JSON structure, pair metadata, duplicate keys in imported JSON, non-empty text values, and basic key/value length rules.
 - Incremental dictionary updates are fetched from a versioned public repository manifest. The first small reviewed update batch currently supports English ↔ Persian; downloaded entries are stored separately and personal entries retain priority.
 - Starter offline dictionaries are included for Persian ↔ English, German, French, Spanish, Italian, Greek, Turkish, Arabic, Russian, Japanese, and Simplified Chinese. Each language pair has its own JSON file under `dictionaries/` (for example `en-fa.json`, `fa-en.json`, `el-fa.json`, and `fa-el.json`); user-added entries override starter meanings in Chrome local storage.
@@ -35,7 +36,7 @@
 ## Dictionary updates and release notes
 
 - The initial update repository is currently pinned to the `test/hover-meaning-prototype` branch for testing. Before publishing a public Chrome Web Store release, change the update manifest URL in `popup.js` to the stable `main` branch and verify the files there.
-- The update button checks only the currently selected language pair. The first batch contains 20 reviewed entries for `en-fa` and 20 for `fa-en`; other pairs report that no remote batch is available yet.
+- The update button checks only the language pair selected in the Dictionary Management section, independently of the active lookup/highlight pair. The first batch contains 20 reviewed entries for `en-fa` and 20 for `fa-en`; other pairs report that no remote batch is available yet.
 - Remote updates do not overwrite saved personal entries. Exported JSON includes language-pair metadata; importing a file tagged for a different pair is rejected.
 - This is a manually triggered update, not a background auto-update. The bundled starter dictionary continues to work without an internet connection.
 
