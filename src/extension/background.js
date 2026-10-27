@@ -10,7 +10,7 @@ function sendOfflineFallback(message, reason, sendResponse) {
   var target = message.target || "fa";
   var pair = source + "-" + target;
   var word = String(message.word || "").toLowerCase();
-  chrome.storage.local.get({ customDictionaries: {} }, function (saved) {
+  chrome.storage.local.get({ customDictionaries: {}, updatedDictionaries: {} }, function (saved) {
     var custom = (saved.customDictionaries || {})[pair] || {};
     var customMeaning = custom[word];
     if (typeof customMeaning === "string" && customMeaning) {
@@ -21,7 +21,8 @@ function sendOfflineFallback(message, reason, sendResponse) {
       if (!response.ok) throw new Error("pair dictionary not found");
       return response.json();
     }).then(function (dict) {
-      var meaning = dict && dict[word];
+      var updated = (saved.updatedDictionaries || {})[pair] || {};
+      var meaning = Object.prototype.hasOwnProperty.call(updated, word) ? updated[word] : (dict && dict[word]);
       if (typeof meaning === "string" && meaning) {
         sendResponse({ ok: true, word: message.word, meaning: meaning, offlineFallback: true });
       } else {
