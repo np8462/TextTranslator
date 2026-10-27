@@ -211,7 +211,7 @@ document.addEventListener("DOMContentLoaded", function () {
     readSelectedFile(function (rawText) {
       var report = validateDictionaryText(rawText, pairKey());
       if (!report.ok) {
-        dictionaryToolsResult.textContent = "فایل وارد نشد. " + report.issues.join("؛ ");
+        dictionaryToolsResult.textContent = "فایل وارد نشد. " + (report.error || report.issues.join("؛ "));
         return;
       }
       var imported = report.entries;
@@ -253,7 +253,7 @@ document.addEventListener("DOMContentLoaded", function () {
           return response.text();
         }).then(function (rawText) {
           var report = validateDictionaryText(rawText, pair);
-          if (!report.ok) throw new Error("بررسی کیفیت به‌روزرسانی رد شد: " + report.issues.join("؛ "));
+          if (!report.ok) throw new Error("بررسی کیفیت به‌روزرسانی رد شد: " + (report.error || report.issues.join("؛ ")));
           var allUpdates = saved.updatedDictionaries || {}, pairUpdates = allUpdates[pair] || {};
           Object.keys(report.entries).forEach(function (word) { pairUpdates[word.trim().toLowerCase()] = report.entries[word].trim(); });
           allUpdates[pair] = pairUpdates;
