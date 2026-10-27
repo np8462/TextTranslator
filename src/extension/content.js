@@ -165,7 +165,7 @@
       if (card && !hideTimer) hideTimer = setTimeout(removeCard, 350);
       return;
     }
-    if (found.word === lastHoverWord) return;
+    if (found.word === lastHoverWord && card) return;
     lastHoverWord = found.word;
     hoverTimer = setTimeout(function () {
       hoverTimer = null;
