@@ -22,15 +22,41 @@ document.addEventListener("DOMContentLoaded", function () {
   var importDictionary = document.getElementById("import-dictionary");
   var checkDictionary = document.getElementById("check-dictionary");
   var updateDictionary = document.getElementById("update-dictionary");
+  var dictionarySourceSelect = document.getElementById("dictionary-source-language");
+  var dictionaryTargetSelect = document.getElementById("dictionary-target-language");
+  var dictionaryPairHelp = document.getElementById("dictionary-pair-help");
   var currentWord = "";
   var currentMeaning = "";
   var dictionaryMode = "online";
   var sourceLanguage = "en";
   var targetLanguage = "fa";
+  var dictionarySourceLanguage = "en";
+  var dictionaryTargetLanguage = "fa";
   var offline = {};
   var offlineLoaded = false;
 
   function pairKey() { return sourceLanguage + "-" + targetLanguage; }
+  function managementPairKey() { return dictionarySourceLanguage + "-" + dictionaryTargetLanguage; }
+  function renderManagementPair() {
+    dictionaryPairHelp.textContent = "جفت‌زبان مدیریت دیکشنری: " + LANGUAGE_NAMES[dictionarySourceLanguage] + " ← " + LANGUAGE_NAMES[dictionaryTargetLanguage] + ". این انتخاب از زبان‌های جست‌وجو و هایلایت مستقل است.";
+  }
+  function loadDictionaryForPair(key, callback) {
+    var combined = {};
+    fetch(chrome.runtime.getURL("dictionaries/" + key + ".json")).then(function (response) {
+      if (!response.ok) return {};
+      return response.json();
+    }).catch(function () { return {}; }).then(function (seeded) {
+      Object.keys(seeded || {}).forEach(function (word) { if (typeof seeded[word] === "string") combined[word.toLowerCase()] = seeded[word]; });
+      chrome.storage.local.get({ customDictionaries: {}, updatedDictionaries: {}, customDictionary: {} }, function (saved) {
+        var updated = (saved.updatedDictionaries || {})[key] || {};
+        Object.keys(updated).forEach(function (word) { if (typeof updated[word] === "string") combined[word.toLowerCase()] = updated[word]; });
+        var custom = (saved.customDictionaries || {})[key] || {};
+        if (key === "en-fa" && !Object.keys(custom).length && saved.customDictionary) custom = saved.customDictionary;
+        Object.keys(custom).forEach(function (word) { if (typeof custom[word] === "string") combined[word.toLowerCase()] = custom[word]; });
+        callback(combined);
+      });
+    });
+  }
   function render(enabled) {
     status.textContent = enabled ? "وضعیت: افزونه فعال است." : "وضعیت: افزونه خاموش است.";
     toggle.textContent = enabled ? "خاموش کردن افزونه" : "فعال کردن افزونه";
@@ -209,23 +235,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
   importDictionary.addEventListener("click", function () {
     readSelectedFile(function (rawText) {
-      var report = validateDictionaryText(rawText, pairKey());
+      var key = managementPairKey();\n      var report = validateDictionaryText(rawText, key);
       if (!report.ok) {
         dictionaryToolsResult.textContent = "فایل وارد نشد. " + (report.error || report.issues.join("؛ "));
         return;
       }
       var imported = report.entries;
       chrome.storage.local.get({ customDictionaries: {} }, function (saved) {
-        var all = saved.customDictionaries || {}, existing = all[pairKey()] || {}, added = 0, conflicts = 0;
+        var all = saved.customDictionaries || {}, existing = all[key] || {}, added = 0, conflicts = 0;
         Object.keys(imported).forEach(function (word) {
           var normalized = word.trim().toLowerCase(), meaning = imported[word];
           if (Object.prototype.hasOwnProperty.call(existing, normalized)) { conflicts++; return; }
           existing[normalized] = meaning.trim(); added++;
         });
-        all[pairKey()] = existing;
+        all[key] = existing;
         chrome.storage.local.set({ customDictionaries: all }, function () {
           loadOffline();
-          dictionaryToolsResult.textContent = "واردکردن موفق: " + added + " واژهٔ تازه اضافه شد؛ " + conflicts + " واژهٔ هم‌نام موجود حفظ شد. جفت‌زبان: " + pairKey() + ".";
+          dictionaryToolsResult.textContent = "واردکردن موفق: " + added + " واژهٔ تازه اضافه شد؛ " + conflicts + " واژهٔ هم‌نام موجود حفظ شد. جفت‌زبان مقصد: " + key + ".";
         });
       });
     });
@@ -238,7 +264,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!response.ok) throw new Error("فهرست به‌روزرسانی HTTP " + response.status);
       return response.json();
     }).then(function (manifest) {
-      var pair = pairKey(), info = manifest && manifest.pairs && manifest.pairs[pair];
+      var pair = managementPairKey(), info = manifest && manifest.pairs && manifest.pairs[pair];
       if (!info || !info.file || !Number(info.version)) throw new Error("فعلاً به‌روزرسانی منتشرشده‌ای برای جفت‌زبان " + pair + " وجود ندارد.");
       chrome.storage.local.get({ dictionaryUpdateVersions: {}, updatedDictionaries: {} }, function (saved) {
         var versions = saved.dictionaryUpdateVersions || {}, oldVersion = Number(versions[pair] || 0);
@@ -276,7 +302,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   chrome.storage.local.get({
     textTranslatorEnabled: true, onlineDictionaryUrl: DEFAULT_URL, dictionaryMode: "online",
-    sourceLanguage: "en", targetLanguage: "fa", tooltipDurationSeconds: 2
+    sourceLanguage: "en", targetLanguage: "fa", managementSourceLanguage: "en", managementTargetLanguage: "fa", tooltipDurationSeconds: 2
   }, function (data) {
     render(data.textTranslatorEnabled !== false);
     endpoint.value = normalizeEndpoint(data.onlineDictionaryUrl || DEFAULT_URL);
@@ -284,12 +310,12 @@ document.addEventListener("DOMContentLoaded", function () {
     dictionaryMode = data.dictionaryMode === "offline" ? "offline" : "online";
     sourceLanguage = LANGUAGE_NAMES[data.sourceLanguage] ? data.sourceLanguage : "en";
     targetLanguage = LANGUAGE_NAMES[data.targetLanguage] ? data.targetLanguage : "fa";
-    sourceSelect.value = sourceLanguage; targetSelect.value = targetLanguage;
+    sourceSelect.value = sourceLanguage; targetSelect.value = targetLanguage;\n    dictionarySourceLanguage = LANGUAGE_NAMES[data.managementSourceLanguage] ? data.managementSourceLanguage : "en";\n    dictionaryTargetLanguage = LANGUAGE_NAMES[data.managementTargetLanguage] ? data.managementTargetLanguage : "fa";\n    dictionarySourceSelect.value = dictionarySourceLanguage; dictionaryTargetSelect.value = dictionaryTargetLanguage;\n    renderManagementPair();
     displayDuration.value = String(Number(data.tooltipDurationSeconds) >= 1 && Number(data.tooltipDurationSeconds) <= 60 ? Math.floor(Number(data.tooltipDurationSeconds)) : 2);
     renderMode(); loadOffline();
   });
 
-  toggle.addEventListener("click", function () {
+  function saveManagementPair() {\n    dictionarySourceLanguage = dictionarySourceSelect.value;\n    dictionaryTargetLanguage = dictionaryTargetSelect.value;\n    renderManagementPair();\n    chrome.storage.local.set({ managementSourceLanguage: dictionarySourceLanguage, managementTargetLanguage: dictionaryTargetLanguage });\n    dictionaryToolsResult.textContent = "جفت‌زبان مدیریت روی " + managementPairKey() + " تنظیم شد. زبان‌های جست‌وجو و هایلایت تغییر نکردند.";\n  }\n  dictionarySourceSelect.addEventListener("change", saveManagementPair);\n  dictionaryTargetSelect.addEventListener("change", saveManagementPair);\n\n  toggle.addEventListener("click", function () {
     chrome.storage.local.get({ textTranslatorEnabled: true }, function (data) {
       var nextEnabled = data.textTranslatorEnabled === false;
       chrome.storage.local.set({ textTranslatorEnabled: nextEnabled }, function () { render(nextEnabled); });
