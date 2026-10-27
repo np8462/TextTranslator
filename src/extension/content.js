@@ -10,6 +10,7 @@
   var requestId = 0;
   var dictionary = {};
   var customDictionaries = {};
+  var updatedDictionaries = {};
   var seedDictionaries = {};
 
   function pairKey() { return sourceLanguage + "-" + targetLanguage; }
@@ -17,6 +18,8 @@
     dictionary = {};
     var seeded = seedDictionaries[pairKey()] || {};
     Object.keys(seeded).forEach(function (key) { dictionary[key.toLowerCase()] = seeded[key]; });
+    var updated = updatedDictionaries[pairKey()] || {};
+    Object.keys(updated).forEach(function (key) { if (typeof updated[key] === "string") dictionary[key.toLowerCase()] = updated[key]; });
     var saved = customDictionaries[pairKey()] || {};
     Object.keys(saved).forEach(function (key) { if (typeof saved[key] === "string") dictionary[key.toLowerCase()] = saved[key]; });
   }
@@ -39,13 +42,14 @@
   loadPairDictionary();
   chrome.storage.local.get({
     textTranslatorEnabled: true, dictionaryMode: "online", sourceLanguage: "en",
-    targetLanguage: "fa", customDictionaries: {}, customDictionary: {}, tooltipDurationSeconds: 2
+    targetLanguage: "fa", customDictionaries: {}, customDictionary: {}, updatedDictionaries: {}, tooltipDurationSeconds: 2
   }, function (data) {
     enabled = data.textTranslatorEnabled !== false;
     dictionaryMode = data.dictionaryMode === "offline" ? "offline" : "online";
     sourceLanguage = data.sourceLanguage || "en";
     targetLanguage = data.targetLanguage || "fa";
     customDictionaries = data.customDictionaries || {};
+    updatedDictionaries = data.updatedDictionaries || {};
     displayDurationSeconds = Number(data.tooltipDurationSeconds) >= 1 && Number(data.tooltipDurationSeconds) <= 60 ? Math.floor(Number(data.tooltipDurationSeconds)) : 2;
     if (!customDictionaries["en-fa"] && data.customDictionary && Object.keys(data.customDictionary).length) {
       customDictionaries["en-fa"] = data.customDictionary;
@@ -181,7 +185,8 @@
     if (changes.sourceLanguage) sourceLanguage = changes.sourceLanguage.newValue || "en";
     if (changes.targetLanguage) targetLanguage = changes.targetLanguage.newValue || "fa";
     if (changes.customDictionaries) customDictionaries = changes.customDictionaries.newValue || {};
-    if (changes.dictionaryMode || changes.sourceLanguage || changes.targetLanguage || changes.customDictionaries) {
+    if (changes.updatedDictionaries) updatedDictionaries = changes.updatedDictionaries.newValue || {};
+    if (changes.dictionaryMode || changes.sourceLanguage || changes.targetLanguage || changes.customDictionaries || changes.updatedDictionaries) {
       requestId++; removeCard();
       if (changes.sourceLanguage || changes.targetLanguage) loadPairDictionary();
       else rebuildDictionary();
