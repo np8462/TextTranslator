@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function pairFromFile(file, parsed) {
     var fromMetadata = pairFromMetadata(parsed);
     if (fromMetadata) return fromMetadata;
-    var name = String(file && file.name || "").replace(/\\.json$/i, "").toLowerCase();
+    var name = String(file && file.name || "").replace(/\.json$/i, "").toLowerCase();
     var pairs = SUPPORTED_PAIRS.slice(0).sort(function (a, b) { return b.length - a.length; });
     for (var i = 0; i < pairs.length; i++) {
       var candidate = pairs[i].toLowerCase();
