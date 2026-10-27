@@ -1,6 +1,6 @@
 # TextTranslator Chrome Extension
 
-**Status:** Local prototype, version 0.6.2. Changes are limited to the test branch; this is not a published Chrome Web Store release.
+**Status:** Local prototype, version 0.7.0. Changes are limited to the test branch; this is not a published Chrome Web Store release.
 
 این افزونه می‌تواند هنگام بردن ماوس روی یک واژه یا انتخاب آن در صفحه، معنی آن را در یک کارت کوچک نشان دهد. حالت آنلاین/آفلاین و جفت‌زبان انتخاب‌شده در پنجرهٔ افزونه برای کلمات هایلایت‌شده نیز اعمال می‌شود.
 
@@ -8,8 +8,12 @@
 
 - Separate source and target language selectors: English, German, French, Spanish, Italian, Greek, Turkish, Arabic, Russian, Japanese, Simplified Chinese, and Persian.
 - Separate local saved dictionary for each language pair (for example, \`en-fa\` and \`de-fa\`).
+- Import/export personal dictionaries as pair-tagged JSON files; imported files are validated before saving, and existing personal entries are kept when names conflict.
+- Dictionary quality check validates JSON structure, pair metadata, duplicate keys in imported JSON, non-empty text values, and basic key/value length rules.
+- Incremental dictionary updates are fetched from a versioned public repository manifest. The first small reviewed update batch currently supports English ↔ Persian; downloaded entries are stored separately and personal entries retain priority.
 - Starter offline dictionaries are included for Persian ↔ English, German, French, Spanish, Italian, Greek, Turkish, Arabic, Russian, Japanese, and Simplified Chinese. Each language pair has its own JSON file under `dictionaries/` (for example `en-fa.json`, `fa-en.json`, `el-fa.json`, and `fa-el.json`); user-added entries override starter meanings in Chrome local storage.
 - One online/offline toggle shared by popup lookup and highlighted-word lookup.
+- A dictionary management panel provides export, import, quality checks, and a manual button to check for incremental updates.
 - When the default Google endpoint returns HTTP 429 or another network error, the extension tries MyMemory as a secondary online translation service before using the offline dictionary. MyMemory has its own usage limits and may not always be available.
 - The default online endpoint is \`https://translate.googleapis.com/translate_a/single?client=gtx&sl={source}&tl={target}&dt=t&q={word}\`.
 - This endpoint is a public, unofficial Google Translate interface; it is not a documented, guaranteed Google Cloud Translation API and may change or stop working.
@@ -27,6 +31,13 @@
 6. Choose the source and target languages, then click **اعمال زبان‌ها**.
 7. Select online or offline mode and search a word, or hover over a single word or select it on a webpage.
 8. After an online meaning appears, click **＋** in the popup to save it for offline use in the same language pair.
+
+## Dictionary updates and release notes
+
+- The initial update repository is currently pinned to the `test/hover-meaning-prototype` branch for testing. Before publishing a public Chrome Web Store release, change the update manifest URL in `popup.js` to the stable `main` branch and verify the files there.
+- The update button checks only the currently selected language pair. The first batch contains 20 reviewed entries for `en-fa` and 20 for `fa-en`; other pairs report that no remote batch is available yet.
+- Remote updates do not overwrite saved personal entries. Exported JSON includes language-pair metadata; importing a file tagged for a different pair is rejected.
+- This is a manually triggered update, not a background auto-update. The bundled starter dictionary continues to work without an internet connection.
 
 ## Notes
 
