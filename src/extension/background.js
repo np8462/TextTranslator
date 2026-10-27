@@ -33,6 +33,37 @@ function sendOfflineFallback(message, reason, sendResponse) {
   });
 }
 
+function trySecondaryOnline(message, reason, sendResponse) {
+  var source = message.source || "en";
+  var target = message.target || "fa";
+  var word = String(message.word || "").trim();
+  var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(word) +
+    "&langpair=" + encodeURIComponent(source + "|" + target) + "&mt=1";
+  fetch(url, { headers: { "Accept": "application/json" } }).then(function (response) {
+    if (!response.ok) throw new Error("MyMemory HTTP " + response.status);
+    return response.json();
+  }).then(function (data) {
+    var meaning = data && data.responseData && data.responseData.translatedText;
+    if (Number(data && data.responseStatus) !== 200 || typeof meaning !== "string" ||
+        !meaning.trim() || meaning.trim().toLowerCase() === word.toLowerCase()) {
+      throw new Error(data && data.responseDetails ? data.responseDetails : "MyMemory did not return a translation");
+    }
+    meaning = meaning.trim();
+    var key = cacheKey(source, target, word);
+    chrome.storage.local.get({ onlineMeaningCache: {} }, function (saved) {
+      var cache = saved.onlineMeaningCache || {};
+      cache[key] = { meaning: meaning, expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000 };
+      chrome.storage.local.set({ onlineMeaningCache: cache });
+    });
+    sendResponse({ ok: true, word: word, meaning: meaning, provider: "mymemory", fallbackProvider: true });
+  }).catch(function (secondaryError) {
+    var combined = reason + " سرویس جایگزین هم موفق نشد؛ " +
+      (secondaryError && secondaryError.message ? secondaryError.message : "خطای نامشخص") +
+      ". دیکشنری آفلاین بررسی می‌شود.";
+    sendOfflineFallback(message, combined, sendResponse);
+  });
+}
+
 function performLookup(message, sendResponse) {
   var source = message.source || "en";
   var target = message.target || "fa";
@@ -45,7 +76,7 @@ function performLookup(message, sendResponse) {
       return;
     }
     if (settings.onlineCooldownUntil > Date.now()) {
-      sendOfflineFallback(message, "سرویس آنلاین موقتاً درخواست‌ها را محدود کرده (HTTP 429). کمی صبر کن؛ فعلاً معنی آفلاین بررسی شد.", sendResponse);
+      trySecondaryOnline(message, "سرویس اصلی آنلاین موقتاً در محدودیت است.", sendResponse);
       return;
     }
     var template = (settings.onlineDictionaryUrl || DEFAULT_DICTIONARY_URL).trim();
@@ -85,9 +116,9 @@ function performLookup(message, sendResponse) {
     }).catch(function (error) {
       if (error && error.status === 429) {
         chrome.storage.local.set({ onlineCooldownUntil: Date.now() + 60 * 1000 });
-        sendOfflineFallback(message, "سرویس آنلاین درخواست‌ها را محدود کرده (HTTP 429). یک دقیقه بعد دوباره امتحان کن؛ دیکشنری آفلاین بررسی شد.", sendResponse);
+        trySecondaryOnline(message, "سرویس اصلی آنلاین درخواست‌ها را محدود کرده (HTTP 429).", sendResponse);
       } else {
-        sendOfflineFallback(message, "ارتباط آنلاین ناموفق بود: " + (error && error.message ? error.message : "خطای شبکه") + ". دیکشنری آفلاین بررسی شد.", sendResponse);
+        trySecondaryOnline(message, "ارتباط با سرویس اصلی آنلاین ناموفق بود: " + (error && error.message ? error.message : "خطای شبکه") + ".", sendResponse);
       }
     });
   });
