@@ -1,6 +1,6 @@
 # TextTranslator Chrome Extension
 
-**Status:** Local prototype, version 0.7.2. Changes are limited to the test branch; this is not a published Chrome Web Store release.
+**Status:** Local prototype, version 0.7.3. Changes are limited to the test branch; this is not a published Chrome Web Store release.
 
 این افزونه می‌تواند هنگام بردن ماوس روی یک واژه یا انتخاب آن در صفحه، معنی آن را در یک کارت کوچک نشان دهد. حالت آنلاین/آفلاین و جفت‌زبان انتخاب‌شده در پنجرهٔ افزونه برای کلمات هایلایت‌شده نیز اعمال می‌شود.
 
@@ -9,12 +9,12 @@
 - Separate source and target language selectors: English, German, French, Spanish, Italian, Greek, Turkish, Arabic, Russian, Japanese, Simplified Chinese, and Persian.
 - Separate local saved dictionary for each language pair (for example, \`en-fa\` and \`de-fa\`).
 - Import one or multiple JSON dictionary files in one action. The language pair is inferred from file metadata or a pair-tagged filename (for example `en-fa.json`); existing matching entries are updated with the imported meaning.
-- Only export requires choosing a language pair. Quality checks run against the selected JSON file(s), and manual remote updates check every pair available in the remote manifest.
+- Export supports one selected pair or all pairs together as a ZIP archive containing one JSON file per pair. Quality checks run against the selected JSON file(s), and manual remote updates check every pair available in the remote manifest.
 - Dictionary quality check validates JSON structure, pair metadata, duplicate keys in imported JSON, non-empty text values, and basic key/value length rules.
 - Incremental dictionary updates are fetched from a versioned public repository manifest. The first small reviewed update batch currently supports English ↔ Persian; downloaded entries are stored separately and personal entries retain priority.
 - Starter offline dictionaries are included for Persian ↔ English, German, French, Spanish, Italian, Greek, Turkish, Arabic, Russian, Japanese, and Simplified Chinese. Each language pair has its own JSON file under `dictionaries/` (for example `en-fa.json`, `fa-en.json`, `el-fa.json`, and `fa-el.json`); user-added entries override starter meanings in Chrome local storage.
 - One online/offline toggle shared by popup lookup and highlighted-word lookup.
-- A dictionary management panel provides multi-file import, pair-selected export, selected-file quality checks, and a manual button to check all available incremental updates.
+- A dictionary management panel provides multi-file import, pair-selected JSON export and all-dictionaries ZIP backup, selected-file quality checks, and a manual button to check all available incremental updates.
 - When the default Google endpoint returns HTTP 429 or another network error, the extension tries MyMemory as a secondary online translation service before using the offline dictionary. MyMemory has its own usage limits and may not always be available.
 - The default online endpoint is \`https://translate.googleapis.com/translate_a/single?client=gtx&sl={source}&tl={target}&dt=t&q={word}\`.
 - This endpoint is a public, unofficial Google Translate interface; it is not a documented, guaranteed Google Cloud Translation API and may change or stop working.
@@ -59,7 +59,7 @@
 ۵. هر جفت‌زبان واژه‌نامهٔ ذخیره‌شدهٔ جداگانه دارد.
 ۶. آدرس پیش‌فرض از رابط عمومی و غیررسمی ترجمهٔ گوگل استفاده می‌کند و تضمین رسمی یا پایداری ندارد.
 
-## Version 0.7.2 test notes
+## Version 0.7.3 test notes
 
 - Import accepts multiple JSON files. Pair metadata or a recognized pair suffix in the filename identifies the destination. A file with no detectable pair is skipped rather than guessed.
 - Imported meanings update matching personal entries; new words are added. Personal entries remain separate from bundled starter files and remote update files.
@@ -67,3 +67,11 @@
 - Quality check validates the currently selected file(s), not the active lookup dictionary.
 - Tooltip hover logic now permits the same word to trigger a lookup again when its prior card is no longer present.
 - Static syntax checks do not replace a real Chrome 109 browser test; follow the staged test checklist before release.
+
+
+## Version 0.7.3 test notes
+
+- The export selector includes an “all dictionaries” option that downloads `texttranslator-all-dictionaries.zip`.
+- The ZIP contains one JSON file for each of the 22 supported language pairs plus a README. Each JSON preserves language-pair metadata and merges bundled starter words, downloaded updates, and personal custom entries.
+- The ZIP is generated locally in the popup without a third-party library. Extract it and select all JSON files together in the multi-file Import control to restore them.
+- ZIP creation is implemented with stored (uncompressed) entries for compatibility; real Chrome 109 download and re-import testing is still required.
