@@ -6,9 +6,9 @@
 
 ## Features
 
-- Separate source and target language selectors: English, German, French, Spanish, Italian, Turkish, Arabic, Russian, Japanese, Simplified Chinese, and Persian.
+- Separate source and target language selectors: English, German, French, Spanish, Italian, Greek, Turkish, Arabic, Russian, Japanese, Simplified Chinese, and Persian.
 - Separate local saved dictionary for each language pair (for example, \`en-fa\` and \`de-fa\`).
-- Starter offline dictionaries are included for Persian ↔ English, German, French, Spanish, Italian, Turkish, Arabic, Russian, Japanese, and Simplified Chinese. Each language pair has its own JSON file under `dictionaries/` (for example `en-fa.json` and `fa-en.json`); user-added entries override starter meanings in Chrome local storage.
+- Starter offline dictionaries are included for Persian ↔ English, German, French, Spanish, Italian, Greek, Turkish, Arabic, Russian, Japanese, and Simplified Chinese. Each language pair has its own JSON file under `dictionaries/` (for example `en-fa.json`, `fa-en.json`, `el-fa.json`, and `fa-el.json`); user-added entries override starter meanings in Chrome local storage.
 - One online/offline toggle shared by popup lookup and highlighted-word lookup.
 - The default online endpoint is \`https://translate.googleapis.com/translate_a/single?client=gtx&sl={source}&tl={target}&dt=t&q={word}\`.
 - This endpoint is a public, unofficial Google Translate interface; it is not a documented, guaranteed Google Cloud Translation API and may change or stop working.
@@ -29,7 +29,7 @@
 
 ## Notes
 
-- The bundled English → Persian dictionary includes \`apple: سیب\` for the common fruit meaning.
+- The Greek ↔ Persian starter dictionaries contain a small set of common words and are intended for initial testing, not as complete dictionaries. Italian ↔ Persian starter dictionaries are also included.\n- The bundled English → Persian dictionary includes \`apple: سیب\` for the common fruit meaning.
 - Custom saved dictionaries are stored locally in Chrome and do not modify the pair JSON files in the repository.
 - The online endpoint requires internet access and permission to contact its host. It is unofficial and may change without notice. HTTP 429 means the service is rate-limiting requests; caching reduces repeat requests but cannot guarantee the endpoint will always work.
 - Machine translation is not a full educational dictionary and can give context-dependent results.
