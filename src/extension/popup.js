@@ -238,23 +238,86 @@ document.addEventListener("DOMContentLoaded", function () {
     next();
   }
 
+  function makeZipBlob(files) {
+    var encoder = new TextEncoder(), crcTable = [];
+    for (var n = 0; n < 256; n++) {
+      var c = n;
+      for (var k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      crcTable[n] = c >>> 0;
+    }
+    function crc32(bytes) {
+      var crc = 0xFFFFFFFF;
+      for (var i = 0; i < bytes.length; i++) crc = crcTable[(crc ^ bytes[i]) & 255] ^ (crc >>> 8);
+      return (crc ^ 0xFFFFFFFF) >>> 0;
+    }
+    function put16(view, offset, value) { view.setUint16(offset, value, true); }
+    function put32(view, offset, value) { view.setUint32(offset, value >>> 0, true); }
+    var localParts = [], centralParts = [], offset = 0;
+    files.forEach(function (file) {
+      var name = encoder.encode(file.name), data = encoder.encode(file.content), crc = crc32(data);
+      var local = new Uint8Array(30 + name.length), lv = new DataView(local.buffer);
+      put32(lv, 0, 0x04034b50); put16(lv, 4, 20); put16(lv, 6, 0x0800); put16(lv, 8, 0);
+      put16(lv, 10, 0); put16(lv, 12, 0); put32(lv, 14, crc); put32(lv, 18, data.length);
+      put32(lv, 22, data.length); put16(lv, 26, name.length); put16(lv, 28, 0); local.set(name, 30);
+      localParts.push(local, data);
+      var central = new Uint8Array(46 + name.length), cv = new DataView(central.buffer);
+      put32(cv, 0, 0x02014b50); put16(cv, 4, 20); put16(cv, 6, 20); put16(cv, 8, 0x0800); put16(cv, 10, 0);
+      put16(cv, 12, 0); put16(cv, 14, 0); put32(cv, 16, crc); put32(cv, 20, data.length);
+      put32(cv, 24, data.length); put16(cv, 28, name.length); put16(cv, 30, 0); put16(cv, 32, 0);
+      put16(cv, 34, 0); put16(cv, 36, 0); put32(cv, 38, 0); put32(cv, 42, offset); central.set(name, 46);
+      centralParts.push(central); offset += local.length + data.length;
+    });
+    var centralSize = centralParts.reduce(function (sum, part) { return sum + part.length; }, 0);
+    var end = new Uint8Array(22), ev = new DataView(end.buffer);
+    put32(ev, 0, 0x06054b50); put16(ev, 4, 0); put16(ev, 6, 0);
+    put16(ev, 8, files.length); put16(ev, 10, files.length);
+    put32(ev, 12, centralSize); put32(ev, 16, offset); put16(ev, 20, 0);
+    return new Blob(localParts.concat(centralParts, [end]), { type: "application/zip" });
+  }
+  function downloadBlob(blob, filename) {
+    var url = URL.createObjectURL(blob), anchor = document.createElement("a");
+    anchor.href = url; anchor.download = filename;
+    document.body.appendChild(anchor); anchor.click(); anchor.remove();
+    window.setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+  }
+  function payloadForPair(key, entries) {
+    var source = "", target = "";
+    var codes = ["zh-CN","en","de","fr","es","it","el","tr","ar","ru","ja","fa"];
+    for (var i = 0; i < codes.length; i++) {
+      if (key.indexOf(codes[i] + "-") === 0) { source = codes[i]; target = key.slice(codes[i].length + 1); break; }
+    }
+    return { format: "texttranslator-dictionary", version: 1, sourceLanguage: source,
+      targetLanguage: target, exportedAt: new Date().toISOString(), entries: entries };
+  }
+  function exportAllDictionaries() {
+    dictionaryToolsResult.textContent = "در حال آماده‌سازی ZIP از همهٔ جفت‌زبان‌ها...";
+    var files = [], index = 0, totalWords = 0;
+    function nextPair() {
+      if (index >= SUPPORTED_PAIRS.length) {
+        files.push({ name: "README.txt", content: "TextTranslator dictionary backup\nContains one JSON file per supported language pair.\nImport each JSON file using the extension's multi-file Import option.\nPersonal entries, downloaded updates, and bundled starter entries are merged in each file.\n" });
+        var blob = makeZipBlob(files);
+        downloadBlob(blob, "texttranslator-all-dictionaries.zip");
+        dictionaryToolsResult.textContent = "پشتیبان ZIP آماده شد: " + SUPPORTED_PAIRS.length + " دیکشنری، " + totalWords + " واژه. هر جفت‌زبان فایل JSON مستقل دارد و می‌توانی همهٔ فایل‌ها را باهم Import کنی.";
+        return;
+      }
+      var key = SUPPORTED_PAIRS[index++];
+      loadDictionaryForPair(key, function (entries) {
+        var payload = payloadForPair(key, entries);
+        totalWords += Object.keys(entries).length;
+        files.push({ name: key + ".json", content: JSON.stringify(payload, null, 2) + "\n" });
+        nextPair();
+      });
+    }
+    nextPair();
+  }
   exportDictionary.addEventListener("click", function () {
     var key = exportPairSelect.value;
+    if (key === "__all_zip__") { exportAllDictionaries(); return; }
     if (SUPPORTED_PAIRS.indexOf(key) < 0) { dictionaryToolsResult.textContent = "یک جفت‌زبان معتبر برای خروجی انتخاب کن."; return; }
     loadDictionaryForPair(key, function (entries) {
-      var parts = key.split("-");
-      var source = "", target = "";
-      var codes = ["zh-CN","en","de","fr","es","it","el","tr","ar","ru","ja","fa"];
-      for (var i = 0; i < codes.length; i++) {
-        if (key.indexOf(codes[i] + "-") === 0) { source = codes[i]; target = key.slice(codes[i].length + 1); break; }
-      }
-      var payload = { format: "texttranslator-dictionary", version: 1, sourceLanguage: source,
-        targetLanguage: target, exportedAt: new Date().toISOString(), entries: entries };
+      var payload = payloadForPair(key, entries);
       var blob = new Blob([JSON.stringify(payload, null, 2) + "\n"], { type: "application/json;charset=utf-8" });
-      var url = URL.createObjectURL(blob), anchor = document.createElement("a");
-      anchor.href = url; anchor.download = "texttranslator-" + key + ".json";
-      document.body.appendChild(anchor); anchor.click(); anchor.remove();
-      window.setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      downloadBlob(blob, "texttranslator-" + key + ".json");
       dictionaryToolsResult.textContent = "خروجی " + Object.keys(entries).length + " واژه از " + key + " آماده شد. محل ذخیره را از پنجرهٔ دانلود مرورگر یا تنظیمات Chrome تعیین کن.";
     });
   });
