@@ -235,7 +235,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   importDictionary.addEventListener("click", function () {
     readSelectedFile(function (rawText) {
-      var key = managementPairKey();\n      var report = validateDictionaryText(rawText, key);
+      var key = managementPairKey();
+      var report = validateDictionaryText(rawText, key);
       if (!report.ok) {
         dictionaryToolsResult.textContent = "فایل وارد نشد. " + (report.error || report.issues.join("؛ "));
         return;
@@ -310,12 +311,26 @@ document.addEventListener("DOMContentLoaded", function () {
     dictionaryMode = data.dictionaryMode === "offline" ? "offline" : "online";
     sourceLanguage = LANGUAGE_NAMES[data.sourceLanguage] ? data.sourceLanguage : "en";
     targetLanguage = LANGUAGE_NAMES[data.targetLanguage] ? data.targetLanguage : "fa";
-    sourceSelect.value = sourceLanguage; targetSelect.value = targetLanguage;\n    dictionarySourceLanguage = LANGUAGE_NAMES[data.managementSourceLanguage] ? data.managementSourceLanguage : "en";\n    dictionaryTargetLanguage = LANGUAGE_NAMES[data.managementTargetLanguage] ? data.managementTargetLanguage : "fa";\n    dictionarySourceSelect.value = dictionarySourceLanguage; dictionaryTargetSelect.value = dictionaryTargetLanguage;\n    renderManagementPair();
+    sourceSelect.value = sourceLanguage; targetSelect.value = targetLanguage;
+    dictionarySourceLanguage = LANGUAGE_NAMES[data.managementSourceLanguage] ? data.managementSourceLanguage : "en";
+    dictionaryTargetLanguage = LANGUAGE_NAMES[data.managementTargetLanguage] ? data.managementTargetLanguage : "fa";
+    dictionarySourceSelect.value = dictionarySourceLanguage; dictionaryTargetSelect.value = dictionaryTargetLanguage;
+    renderManagementPair();
     displayDuration.value = String(Number(data.tooltipDurationSeconds) >= 1 && Number(data.tooltipDurationSeconds) <= 60 ? Math.floor(Number(data.tooltipDurationSeconds)) : 2);
     renderMode(); loadOffline();
   });
 
-  function saveManagementPair() {\n    dictionarySourceLanguage = dictionarySourceSelect.value;\n    dictionaryTargetLanguage = dictionaryTargetSelect.value;\n    renderManagementPair();\n    chrome.storage.local.set({ managementSourceLanguage: dictionarySourceLanguage, managementTargetLanguage: dictionaryTargetLanguage });\n    dictionaryToolsResult.textContent = "جفت‌زبان مدیریت روی " + managementPairKey() + " تنظیم شد. زبان‌های جست‌وجو و هایلایت تغییر نکردند.";\n  }\n  dictionarySourceSelect.addEventListener("change", saveManagementPair);\n  dictionaryTargetSelect.addEventListener("change", saveManagementPair);\n\n  toggle.addEventListener("click", function () {
+  function saveManagementPair() {
+    dictionarySourceLanguage = dictionarySourceSelect.value;
+    dictionaryTargetLanguage = dictionaryTargetSelect.value;
+    renderManagementPair();
+    chrome.storage.local.set({ managementSourceLanguage: dictionarySourceLanguage, managementTargetLanguage: dictionaryTargetLanguage });
+    dictionaryToolsResult.textContent = "جفت‌زبان مدیریت روی " + managementPairKey() + " تنظیم شد. زبان‌های جست‌وجو و هایلایت تغییر نکردند.";
+  }
+  dictionarySourceSelect.addEventListener("change", saveManagementPair);
+  dictionaryTargetSelect.addEventListener("change", saveManagementPair);
+
+  toggle.addEventListener("click", function () {
     chrome.storage.local.get({ textTranslatorEnabled: true }, function (data) {
       var nextEnabled = data.textTranslatorEnabled === false;
       chrome.storage.local.set({ textTranslatorEnabled: nextEnabled }, function () { render(nextEnabled); });
