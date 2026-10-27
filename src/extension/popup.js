@@ -1,5 +1,5 @@
 var DEFAULT_URL = "https://translate.googleapis.com/translate_a/single?client=gtx&sl={source}&tl={target}&dt=t&q={word}";
-var LANGUAGE_NAMES = { en: "انگلیسی", de: "آلمانی", fr: "فرانسوی", es: "اسپانیایی", it: "ایتالیایی", tr: "ترکی", ar: "عربی", ru: "روسی", ja: "ژاپنی", "zh-CN": "چینی ساده‌شده", fa: "فارسی" };
+var LANGUAGE_NAMES = { en: "انگلیسی", de: "آلمانی", fr: "فرانسوی", es: "اسپانیایی", it: "ایتالیایی", el: "یونانی", tr: "ترکی", ar: "عربی", ru: "روسی", ja: "ژاپنی", "zh-CN": "چینی ساده‌شده", fa: "فارسی" };
 
 document.addEventListener("DOMContentLoaded", function () {
   var status = document.getElementById("status");
