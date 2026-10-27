@@ -32,6 +32,17 @@
 </section>
 <section class="panel">
 <h2>مدیریت دیکشنری</h2>
+<p class="note">زبان‌های این بخش مستقل از زبان‌های جست‌وجو و هایلایت هستند. این جفت‌زبان تعیین می‌کند فایل Import/Export، بررسی کیفیت و بستهٔ Update به کدام دیکشنری مربوط باشند.</p>
+<label for="dictionary-source-language">زبان مبدأ دیکشنری برای مدیریت</label>
+<select id="dictionary-source-language">
+<option value="en">انگلیسی</option><option value="de">آلمانی</option><option value="fr">فرانسوی</option><option value="es">اسپانیایی</option><option value="it">ایتالیایی</option><option value="el">یونانی</option><option value="tr">ترکی</option><option value="ar">عربی</option><option value="ru">روسی</option><option value="ja">ژاپنی</option><option value="zh-CN">چینی ساده‌شده</option><option value="fa">فارسی</option>
+</select>
+<label for="dictionary-target-language">زبان مقصد دیکشنری برای مدیریت</label>
+<select id="dictionary-target-language">
+<option value="fa">فارسی</option><option value="en">انگلیسی</option><option value="de">آلمانی</option><option value="fr">فرانسوی</option><option value="es">اسپانیایی</option><option value="it">ایتالیایی</option><option value="el">یونانی</option><option value="tr">ترکی</option><option value="ar">عربی</option><option value="ru">روسی</option><option value="ja">ژاپنی</option><option value="zh-CN">چینی ساده‌شده</option>
+</select>
+<p id="dictionary-pair-help" class="note">جفت‌زبان مدیریت: انگلیسی ← فارسی</p>
+
 <p class="note">این ابزارها فقط روی جفت‌زبان انتخاب‌شده اثر می‌گذارند. فایل‌های واردشده پیش از ذخیره بررسی می‌شوند.</p>
 <button id="export-dictionary" type="button">خروجی JSON از دیکشنری این جفت‌زبان</button>
 <label for="import-file">انتخاب فایل JSON برای واردکردن</label>
