@@ -1,6 +1,6 @@
 # TextTranslator Chrome Extension
 
-**Status:** Local prototype, version 0.6.1. Changes are limited to the test branch; this is not a published Chrome Web Store release.
+**Status:** Local prototype, version 0.6.2. Changes are limited to the test branch; this is not a published Chrome Web Store release.
 
 این افزونه می‌تواند هنگام بردن ماوس روی یک واژه یا انتخاب آن در صفحه، معنی آن را در یک کارت کوچک نشان دهد. حالت آنلاین/آفلاین و جفت‌زبان انتخاب‌شده در پنجرهٔ افزونه برای کلمات هایلایت‌شده نیز اعمال می‌شود.
 
@@ -10,6 +10,7 @@
 - Separate local saved dictionary for each language pair (for example, \`en-fa\` and \`de-fa\`).
 - Starter offline dictionaries are included for Persian ↔ English, German, French, Spanish, Italian, Greek, Turkish, Arabic, Russian, Japanese, and Simplified Chinese. Each language pair has its own JSON file under `dictionaries/` (for example `en-fa.json`, `fa-en.json`, `el-fa.json`, and `fa-el.json`); user-added entries override starter meanings in Chrome local storage.
 - One online/offline toggle shared by popup lookup and highlighted-word lookup.
+- When the default Google endpoint returns HTTP 429 or another network error, the extension tries MyMemory as a secondary online translation service before using the offline dictionary. MyMemory has its own usage limits and may not always be available.
 - The default online endpoint is \`https://translate.googleapis.com/translate_a/single?client=gtx&sl={source}&tl={target}&dt=t&q={word}\`.
 - This endpoint is a public, unofficial Google Translate interface; it is not a documented, guaranteed Google Cloud Translation API and may change or stop working.
 - The official Google Cloud Translation API requires Google Cloud configuration/authentication and may incur charges.
