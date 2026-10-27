@@ -31,6 +31,18 @@
 
 </section>
 <section class="panel">
+<h2>مدیریت دیکشنری</h2>
+<p class="note">این ابزارها فقط روی جفت‌زبان انتخاب‌شده اثر می‌گذارند. فایل‌های واردشده پیش از ذخیره بررسی می‌شوند.</p>
+<button id="export-dictionary" type="button">خروجی JSON از دیکشنری این جفت‌زبان</button>
+<label for="import-file">انتخاب فایل JSON برای واردکردن</label>
+<input id="import-file" type="file" accept=".json,application/json">
+<button id="import-dictionary" type="button">بررسی و واردکردن فایل</button>
+<button id="check-dictionary" type="button">بررسی کیفیت دیکشنری فعلی</button>
+<button id="update-dictionary" type="button">بررسی به‌روزرسانی واژه‌ها</button>
+<p id="dictionary-tools-result" role="status" aria-live="polite">هنوز عملیاتی انجام نشده است.</p>
+<p class="note">به‌روزرسانی مرحله‌ای فعلاً برای انگلیسی↔فارسی فعال است. واژه‌های ذخیره‌شدهٔ شخصی هنگام به‌روزرسانی حفظ می‌شوند.</p>
+</section>
+<section class="panel">
 <h2>تنظیم دیکشنری آنلاین</h2>
 <label for="endpoint">آدرس سرویس (باید {word}، {source} و {target} را پشتیبانی کند)</label>
 <input id="endpoint" type="text" dir="ltr">
