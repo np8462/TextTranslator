@@ -1,6 +1,6 @@
 # TextTranslator Chrome Extension
 
-**Status:** Local prototype, version 0.7.1. Changes are limited to the test branch; this is not a published Chrome Web Store release.
+**Status:** Local prototype, version 0.7.2. Changes are limited to the test branch; this is not a published Chrome Web Store release.
 
 این افزونه می‌تواند هنگام بردن ماوس روی یک واژه یا انتخاب آن در صفحه، معنی آن را در یک کارت کوچک نشان دهد. حالت آنلاین/آفلاین و جفت‌زبان انتخاب‌شده در پنجرهٔ افزونه برای کلمات هایلایت‌شده نیز اعمال می‌شود.
 
@@ -8,18 +8,18 @@
 
 - Separate source and target language selectors: English, German, French, Spanish, Italian, Greek, Turkish, Arabic, Russian, Japanese, Simplified Chinese, and Persian.
 - Separate local saved dictionary for each language pair (for example, \`en-fa\` and \`de-fa\`).
-- Import/export personal dictionaries as pair-tagged JSON files; imported files are validated before saving, and existing personal entries are kept when names conflict.
-- Dictionary-management source/target selectors are independent from the active lookup/highlight languages. Import, export, quality checks, and remote updates use the explicitly selected management pair.
+- Import one or multiple JSON dictionary files in one action. The language pair is inferred from file metadata or a pair-tagged filename (for example `en-fa.json`); existing matching entries are updated with the imported meaning.
+- Only export requires choosing a language pair. Quality checks run against the selected JSON file(s), and manual remote updates check every pair available in the remote manifest.
 - Dictionary quality check validates JSON structure, pair metadata, duplicate keys in imported JSON, non-empty text values, and basic key/value length rules.
 - Incremental dictionary updates are fetched from a versioned public repository manifest. The first small reviewed update batch currently supports English ↔ Persian; downloaded entries are stored separately and personal entries retain priority.
 - Starter offline dictionaries are included for Persian ↔ English, German, French, Spanish, Italian, Greek, Turkish, Arabic, Russian, Japanese, and Simplified Chinese. Each language pair has its own JSON file under `dictionaries/` (for example `en-fa.json`, `fa-en.json`, `el-fa.json`, and `fa-el.json`); user-added entries override starter meanings in Chrome local storage.
 - One online/offline toggle shared by popup lookup and highlighted-word lookup.
-- A dictionary management panel provides export, import, quality checks, and a manual button to check for incremental updates.
+- A dictionary management panel provides multi-file import, pair-selected export, selected-file quality checks, and a manual button to check all available incremental updates.
 - When the default Google endpoint returns HTTP 429 or another network error, the extension tries MyMemory as a secondary online translation service before using the offline dictionary. MyMemory has its own usage limits and may not always be available.
 - The default online endpoint is \`https://translate.googleapis.com/translate_a/single?client=gtx&sl={source}&tl={target}&dt=t&q={word}\`.
 - This endpoint is a public, unofficial Google Translate interface; it is not a documented, guaranteed Google Cloud Translation API and may change or stop working.
 - The official Google Cloud Translation API requires Google Cloud configuration/authentication and may incur charges.
-- After an online lookup, the **＋** button saves that word and meaning in Chrome local storage under the currently selected language pair. Successful online results are cached locally for seven days; when the service returns HTTP 429, repeated calls are paused for one minute and the extension tries the pair's offline dictionary. The popup does not list dictionary contents. Tooltip duration can be set manually from 1 to 60 seconds (default 2 seconds).
+- After an online lookup, the **＋** button saves that word and meaning in Chrome local storage under the currently selected language pair. Successful online results are cached locally for seven days; when the service returns HTTP 429, repeated calls are paused for one minute and the extension tries the pair's offline dictionary. The popup does not list dictionary contents. Tooltip duration can be set manually from 1 to 60 seconds (default 2 seconds). Hovering the same word again after the tooltip closes should trigger another lookup.
 - No build step or third-party package is required. Uses Manifest V3.
 
 ## Install locally
@@ -36,8 +36,8 @@
 ## Dictionary updates and release notes
 
 - The initial update repository is currently pinned to the `test/hover-meaning-prototype` branch for testing. Before publishing a public Chrome Web Store release, change the update manifest URL in `popup.js` to the stable `main` branch and verify the files there.
-- The update button checks only the language pair selected in the Dictionary Management section, independently of the active lookup/highlight pair. The first batch contains 20 reviewed entries for `en-fa` and 20 for `fa-en`; other pairs report that no remote batch is available yet.
-- Remote updates do not overwrite saved personal entries. Exported JSON includes language-pair metadata; importing a file tagged for a different pair is rejected.
+- The update button checks all pairs listed in the remote manifest. The initial batches contain 20 reviewed entries for `en-fa` and 20 for `fa-en`.
+- Remote updates do not overwrite saved personal entries. Exported JSON includes language-pair metadata. Import infers the destination pair from metadata or the filename; files without a detectable pair are skipped to avoid mixing dictionaries.
 - This is a manually triggered update, not a background auto-update. The bundled starter dictionary continues to work without an internet connection.
 
 ## Notes
@@ -58,3 +58,12 @@
 ۴. برای حالت آفلاین، واژه‌های موجود در دیکشنری پایه یا واژه‌هایی که با **＋** ذخیره کرده‌اید در دسترس‌اند.
 ۵. هر جفت‌زبان واژه‌نامهٔ ذخیره‌شدهٔ جداگانه دارد.
 ۶. آدرس پیش‌فرض از رابط عمومی و غیررسمی ترجمهٔ گوگل استفاده می‌کند و تضمین رسمی یا پایداری ندارد.
+
+## Version 0.7.2 test notes
+
+- Import accepts multiple JSON files. Pair metadata or a recognized pair suffix in the filename identifies the destination. A file with no detectable pair is skipped rather than guessed.
+- Imported meanings update matching personal entries; new words are added. Personal entries remain separate from bundled starter files and remote update files.
+- Export pair is selected explicitly. Chrome controls the download location/prompt according to its download settings.
+- Quality check validates the currently selected file(s), not the active lookup dictionary.
+- Tooltip hover logic now permits the same word to trigger a lookup again when its prior card is no longer present.
+- Static syntax checks do not replace a real Chrome 109 browser test; follow the staged test checklist before release.
