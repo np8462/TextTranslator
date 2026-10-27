@@ -1,0 +1,17 @@
+{
+  "format": "texttranslator-dictionary-updates",
+  "version": 1,
+  "description": "Small reviewed dictionary updates. Updates are merged locally and never replace user-saved entries.",
+  "pairs": {
+    "en-fa": {
+      "version": 1,
+      "file": "en-fa.json",
+      "count": 20
+    },
+    "fa-en": {
+      "version": 1,
+      "file": "fa-en.json",
+      "count": 20
+    }
+  }
+}
