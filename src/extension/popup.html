@@ -35,6 +35,7 @@
 <p class="note">برای Import می‌توانی یک یا چند فایل JSON را هم‌زمان انتخاب کنی. جفت‌زبان از فرادادهٔ فایل یا نامی مانند en-fa.json تشخیص داده می‌شود؛ اگر مشخص نباشد، آن فایل وارد نمی‌شود تا واژه‌ها در دیکشنری اشتباه قرار نگیرند.</p>
 <label for="export-pair">دیکشنری برای خروجی گرفتن</label>
 <select id="export-pair">
+<option value="__all_zip__">همهٔ دیکشنری‌ها — خروجی ZIP یکجا</option>
 <option value="en-fa">انگلیسی ← فارسی (en-fa)</option><option value="fa-en">فارسی ← انگلیسی (fa-en)</option>
 <option value="de-fa">آلمانی ← فارسی (de-fa)</option><option value="fa-de">فارسی ← آلمانی (fa-de)</option>
 <option value="fr-fa">فرانسوی ← فارسی (fr-fa)</option><option value="fa-fr">فارسی ← فرانسوی (fa-fr)</option>
@@ -47,14 +48,14 @@
 <option value="ja-fa">ژاپنی ← فارسی (ja-fa)</option><option value="fa-ja">فارسی ← ژاپنی (fa-ja)</option>
 <option value="zh-CN-fa">چینی ساده‌شده ← فارسی (zh-CN-fa)</option><option value="fa-zh-CN">فارسی ← چینی ساده‌شده (fa-zh-CN)</option>
 </select>
-<button id="export-dictionary" type="button">خروجی JSON از دیکشنری انتخاب‌شده</button>
+<button id="export-dictionary" type="button">خروجی دیکشنری انتخاب‌شده / همه در ZIP</button>
 <label for="import-file">انتخاب یک یا چند فایل JSON برای Import یا بررسی کیفیت</label>
 <input id="import-file" type="file" accept=".json,application/json" multiple>
 <button id="import-dictionary" type="button">Import و ادغام/به‌روزرسانی فایل‌های انتخاب‌شده</button>
 <button id="check-dictionary" type="button">بررسی کیفیت فایل‌های انتخاب‌شده</button>
 <button id="update-dictionary" type="button">بررسی و دریافت همهٔ به‌روزرسانی‌های موجود</button>
 <p id="dictionary-tools-result" role="status" aria-live="polite">هنوز عملیاتی انجام نشده است.</p>
-<p class="note">اگر واژه‌ای در فایل واردشده با واژهٔ موجود هم‌نام باشد، معنی فایل واردشده جایگزین معنی قبلی همان دیکشنری می‌شود. Export از دیکشنری انتخاب‌شده فایل JSON می‌سازد؛ محل ذخیره را تنظیمات دانلود Chrome تعیین می‌کند. به‌روزرسانی آنلاین، همهٔ جفت‌زبان‌هایی را بررسی می‌کند که در فهرست مخزن بسته دارند.</p>
+<p class="note">اگر واژه‌ای در فایل واردشده با واژهٔ موجود هم‌نام باشد، معنی فایل واردشده جایگزین معنی قبلی همان دیکشنری می‌شود. انتخاب یک جفت‌زبان، فایل JSON همان دیکشنری را می‌سازد؛ انتخاب «همهٔ دیکشنری‌ها» یک فایل ZIP شامل JSON جداگانه برای هر جفت‌زبان می‌سازد. محل ذخیره را تنظیمات دانلود Chrome تعیین می‌کند. به‌روزرسانی آنلاین، همهٔ جفت‌زبان‌هایی را بررسی می‌کند که در فهرست مخزن بسته دارند.</p>
 </section>
 <section class="panel">
 <h2>تنظیم دیکشنری آنلاین</h2>
