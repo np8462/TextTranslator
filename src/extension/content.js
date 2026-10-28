@@ -1,5 +1,7 @@
 (function () {
   var enabled = true;
+  var translateOnSelection = true;
+  var translateOnHover = true;
   var dictionaryMode = "online";
   var sourceLanguage = "en";
   var targetLanguage = "fa";
@@ -41,10 +43,13 @@
   }
   loadPairDictionary();
   chrome.storage.local.get({
-    textTranslatorEnabled: true, dictionaryMode: "online", sourceLanguage: "en",
-    targetLanguage: "fa", customDictionaries: {}, customDictionary: {}, updatedDictionaries: {}, tooltipDurationSeconds: 2
+    textTranslatorEnabled: true, translateOnSelection: true, translateOnHover: true,
+    dictionaryMode: "online", sourceLanguage: "en", targetLanguage: "fa",
+    customDictionaries: {}, customDictionary: {}, updatedDictionaries: {}, tooltipDurationSeconds: 2
   }, function (data) {
     enabled = data.textTranslatorEnabled !== false;
+    translateOnSelection = data.translateOnSelection !== false;
+    translateOnHover = data.translateOnHover !== false;
     dictionaryMode = data.dictionaryMode === "offline" ? "offline" : "online";
     sourceLanguage = data.sourceLanguage || "en";
     targetLanguage = data.targetLanguage || "fa";
@@ -63,7 +68,7 @@
     if (card && card.parentNode) card.parentNode.removeChild(card);
     card = null;
   }
-  function makeCard(word, meaning, rect, isLoading, autoSaved, messageType, saveFailed) {
+  function makeCard(word, meaning, rect, isLoading, autoSaved, messageType, saveFailed, offlineSuggestion) {
     removeCard();
     card = document.createElement("div");
     card.setAttribute("role", "status");
@@ -89,6 +94,16 @@
         : "margin-top:7px;padding:5px 7px;border-radius:5px;background:#fff5f4;color:#9f2922;font-size:12px;border:1px solid #e7c0bd;";
       card.appendChild(savedNotice);
     }
+    if (offlineSuggestion) {
+      var offlineTitle = document.createElement("div");
+      offlineTitle.textContent = "پیشنهاد جداگانهٔ معنی آفلاین:";
+      offlineTitle.style.cssText = "margin-top:8px;padding-top:6px;border-top:1px solid #d9e2d9;font-weight:bold;color:#24643b;font-size:12px;";
+      var offlineText = document.createElement("div");
+      offlineText.textContent = offlineSuggestion;
+      offlineText.style.cssText = "margin-top:2px;color:#24643b;";
+      card.appendChild(offlineTitle);
+      card.appendChild(offlineText);
+    }
     card.addEventListener("mouseenter", function () { if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; } });
     card.addEventListener("mouseleave", function () { hideTimer = setTimeout(removeCard, 350); });
     document.documentElement.appendChild(card);
@@ -104,6 +119,12 @@
     if (!element) return false;
     return !!element.closest("input, textarea, select, [contenteditable='true']");
   }
+  function showOnlineFailure(word, error, rect) {
+    var offlineMeaning = dictionary[String(word || "").toLowerCase()];
+    if (offlineMeaning) makeCard(word, "خطای آنلاین: " + error, rect, false, false, "error", false, offlineMeaning);
+    else makeCard(word, "خطای آنلاین: " + error, rect, false, false, "error");
+  }
+
   function showSelectionMeaning(word, rect) {
     var normalized = word.toLowerCase();
     var thisRequest = ++requestId;
@@ -116,21 +137,21 @@
     chrome.runtime.sendMessage({ type: "ONLINE_LOOKUP", word: word, source: sourceLanguage, target: targetLanguage }, function (response) {
       if (thisRequest !== requestId || !card) return;
       if (chrome.runtime.lastError) {
-        makeCard(word, "خطای ارتباط آنلاین؛ اتصال اینترنت و دسترسی سرویس را بررسی کن.", rect, false, false, "error"); return;
+        showOnlineFailure(word, "ارتباط با افزونه یا سرویس ناموفق بود؛ اتصال اینترنت و دسترسی را بررسی کن.", rect); return;
       }
       if (!response || !response.ok) {
-        makeCard(word, response && response.error ? response.error : "معنی آنلاین پیدا نشد.", rect, false, false, "error"); return;
+        showOnlineFailure(word, response && response.error ? response.error : "معنی آنلاین پیدا نشد.", rect); return;
       }
       makeCard(word, response.meaning, rect, false, response.autoSaved === true, "info", response.saveFailed === true);
     });
   }
   function lookupSelection() {
-    if (!enabled) return;
+    if (!enabled || !translateOnSelection) return;
     var selection = window.getSelection();
     if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return;
     if (isEditable(selection.anchorNode) || isEditable(selection.focusNode)) return;
-    var word = selection.toString().trim();
-    if (!word || word.length > 40 || /\s/.test(word)) return;
+    var word = selection.toString().replace(/\s+/g, " ").trim();
+    if (!word || word.length > 80) return;
     if (!/[\p{L}\p{N}]/u.test(word)) return;
     var rect = selection.getRangeAt(0).getBoundingClientRect();
     if (!rect || (!rect.width && !rect.height)) return;
@@ -173,6 +194,9 @@
     }
     if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
     if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
+    if (!translateOnHover) return;
+    var activeSelection = window.getSelection();
+    if (activeSelection && !activeSelection.isCollapsed) return;
     var found = getWordAtPoint(event.clientX, event.clientY);
     if (!found) {
       lastHoverWord = "";
@@ -194,6 +218,9 @@
       enabled = changes.textTranslatorEnabled.newValue !== false;
       if (!enabled) removeCard();
     }
+    if (changes.translateOnSelection) translateOnSelection = changes.translateOnSelection.newValue !== false;
+    if (changes.translateOnHover) translateOnHover = changes.translateOnHover.newValue !== false;
+    if (changes.translateOnSelection || changes.translateOnHover) removeCard();
     if (changes.dictionaryMode) dictionaryMode = changes.dictionaryMode.newValue === "offline" ? "offline" : "online";
     if (changes.tooltipDurationSeconds) displayDurationSeconds = Number(changes.tooltipDurationSeconds.newValue) >= 1 && Number(changes.tooltipDurationSeconds.newValue) <= 60 ? Math.floor(Number(changes.tooltipDurationSeconds.newValue)) : 2;
     if (changes.sourceLanguage) sourceLanguage = changes.sourceLanguage.newValue || "en";

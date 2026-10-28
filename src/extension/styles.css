@@ -13,7 +13,7 @@ input, select { width: 100%; box-sizing: border-box; margin-top: 5px; padding: 8
 #mode-toggle { background: #218653; font-weight: bold; }
 #mode-toggle[aria-pressed="false"] { background: #59636f; }
 #mode-help { font-size: 12px; }
-#result { min-height: 24px; padding: 7px; background: #f5f7f9; border-radius: 5px; }
+#result { min-height: 24px; padding: 7px; background: #f5f7f9; border-radius: 5px; white-space: pre-line; }
 .add-word { background: #218653; font-weight: bold; }
 .add-word:hover { background: #17683f; }
 .add-word span { font-size: 18px; margin-left: 4px; }
@@ -29,3 +29,7 @@ ol { padding-right: 22px; line-height: 1.8; font-size: 12px; }
 #result.warning { border: 1px solid #ead9ad; background: #fffaf0; color: #795d20; }
 #result.info { border: 1px solid #d3e1ee; background: #f3f7fb; color: #345b7d; }
 .save-notice { box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+.trigger-settings { margin-top: 10px; padding: 8px; border: 1px solid #dadce0; border-radius: 6px; }
+.trigger-settings label { display: flex; align-items: center; gap: 7px; margin-top: 7px; line-height: 1.6; }
+.trigger-settings input[type="checkbox"] { width: auto; margin: 0; flex: 0 0 auto; }
+.offline-suggestion { margin: 7px 0; padding: 8px 9px; border: 1px solid #b7dfc4; border-radius: 6px; background: #f1f8f3; color: #24643b; font-size: 12px; line-height: 1.7; }

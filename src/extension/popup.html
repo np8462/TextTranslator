@@ -20,12 +20,18 @@
 <label for="display-duration">مدت نمایش معنی هنگام hover</label>
 <input id="display-duration" type="number" min="1" max="60" step="1" value="2" inputmode="numeric">
 <p class="note">مدت را به ثانیه دستی وارد کن؛ از ۱ تا ۶۰ ثانیه. مقدار پیش‌فرض ۲ ثانیه است.</p>
+<div class="trigger-settings">
+<label><input id="translate-on-selection" type="checkbox" checked> ترجمه با انتخاب متن (واژه یا عبارت)</label>
+<label><input id="translate-on-hover" type="checkbox" checked> ترجمه با حرکت ماوس روی واژه</label>
+<p class="note">هر روش را مستقل روشن یا خاموش کن؛ با خاموش کردن هر دو، این دو روش ترجمه را شروع نمی‌کنند.</p>
+</div>
 <button id="mode-toggle" type="button" aria-pressed="true">حالت دیکشنری: آنلاین</button>
 <p id="mode-help">حالت انتخاب‌شده هم در این پنجره و هم هنگام هایلایت کلمات استفاده می‌شود.</p>
 <label for="word">واژه برای جست‌وجو</label>
-<input id="word" type="text" maxlength="40" placeholder="مثلاً: apple" dir="auto">
+<input id="word" type="text" maxlength="80" placeholder="مثلاً: apple یا take care" dir="auto">
 <button id="lookup" type="button">پیدا کردن معنی</button>
-<p id="result" role="status">یک واژه وارد کن و «پیدا کردن معنی» را بزن.</p>
+<p id="result" role="status">یک واژه یا عبارت وارد کن و «پیدا کردن معنی» را بزن.</p>
+<p id="offline-suggestion" class="offline-suggestion" role="status" aria-live="polite" hidden></p>
 <p id="save-notice" class="save-notice" role="status" aria-live="polite" hidden></p>
 <button id="save-word" class="add-word" type="button" disabled><span aria-hidden="true">＋</span> افزودن معنی به دیکشنری آفلاین همین جفت‌زبان</button>
 <p class="note">ذخیره فقط پس از دریافت معنی آنلاین فعال می‌شود. واژه‌ها در حافظهٔ محلی همین مرورگر Chrome و جداگانه برای هر جفت‌زبان نگهداری می‌شوند؛ داخل فایل‌های GitHub ذخیره نمی‌شوند.</p>
