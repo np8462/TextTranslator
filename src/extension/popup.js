@@ -158,7 +158,7 @@ document.addEventListener("DOMContentLoaded", function () {
           showMeaning(word, response.meaning, response.offlineFallback ? "offline" : "online");
           if (response.autoSaved === true) {
             saveWord.disabled = true;
-            showSaveNotice("ذخیرهٔ خودکار موفق؛ معنی به دیکشنری آفلاین «" + sourceLanguage + " ← " + targetLanguage + "» اضافه شد.", false);
+            showSaveNotice("ذخیرهٔ خودکار موفق؛ معنی به دیکشنری آفلاین «" + LANGUAGE_NAMES[sourceLanguage] + " به " + LANGUAGE_NAMES[targetLanguage] + "» اضافه شد.", false);
           } else if (response.saveFailed === true) {
             showSaveNotice("معنی آنلاین دریافت شد، اما ذخیره‌سازی آفلاین ناموفق بود.", true);
           }
