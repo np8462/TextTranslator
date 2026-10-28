@@ -74,36 +74,57 @@
   function showStatusToast(message, type) {
     if (statusToastTimer) { clearTimeout(statusToastTimer); statusToastTimer = null; }
     if (statusToast && statusToast.parentNode) statusToast.parentNode.removeChild(statusToast);
-    statusToast = document.createElement("div");
-    statusToast.setAttribute("role", "status");
-    statusToast.setAttribute("aria-live", "polite");
-    statusToast.setAttribute("dir", "rtl");
-    statusToast.textContent = message;
-    statusToast.style.cssText = "position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:2147483647;max-width:calc(100vw - 32px);box-sizing:border-box;padding:10px 16px;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.2);font:14px/1.7 Tahoma,Arial,sans-serif;text-align:center;direction:rtl;opacity:1;transition:opacity .2s ease;";
+
+    var host = document.createElement("div");
+    statusToast = host;
+    host.setAttribute("role", "status");
+    host.setAttribute("aria-live", "polite");
+    host.setAttribute("dir", "rtl");
+    host.style.setProperty("all", "initial", "important");
+    host.style.setProperty("position", "fixed", "important");
+    host.style.setProperty("top", "18px", "important");
+    host.style.setProperty("left", "50%", "important");
+    host.style.setProperty("transform", "translateX(-50%)", "important");
+    host.style.setProperty("z-index", "2147483647", "important");
+    host.style.setProperty("display", "block", "important");
+    host.style.setProperty("visibility", "visible", "important");
+    host.style.setProperty("opacity", "1", "important");
+    host.style.setProperty("pointer-events", "none", "important");
+    host.style.setProperty("max-width", "calc(100vw - 32px)", "important");
+
+    var shadow = host.attachShadow ? host.attachShadow({ mode: "open" }) : null;
+    var panel = document.createElement("div");
+    panel.textContent = message;
+    panel.setAttribute("dir", "rtl");
+    panel.style.cssText = "box-sizing:border-box;max-width:calc(100vw - 32px);padding:10px 16px;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.28);font: bold 14px/1.7 Tahoma,Arial,sans-serif;text-align:center;direction:rtl;white-space:normal;word-break:break-word;";
+
     if (type === "success") {
-      statusToast.style.background = "#e6f4ea";
-      statusToast.style.border = "1px solid #81c995";
-      statusToast.style.color = "#176b35";
+      panel.style.background = "#e6f4ea";
+      panel.style.border = "2px solid #188038";
+      panel.style.color = "#176b35";
     } else if (type === "error") {
-      statusToast.style.background = "#fce8e6";
-      statusToast.style.border = "1px solid #e6aaa5";
-      statusToast.style.color = "#a12622";
+      panel.style.background = "#fce8e6";
+      panel.style.border = "2px solid #c5221f";
+      panel.style.color = "#a12622";
     } else {
-      statusToast.style.background = "#fff4ce";
-      statusToast.style.border = "1px solid #e8d19a";
-      statusToast.style.color = "#795900";
+      panel.style.background = "#fff4ce";
+      panel.style.border = "2px solid #e8a817";
+      panel.style.color = "#795900";
     }
-    document.documentElement.appendChild(statusToast);
+    if (shadow) shadow.appendChild(panel);
+    else host.appendChild(panel);
+    (document.documentElement || document.body).appendChild(host);
+
     statusToastTimer = setTimeout(function () {
       if (!statusToast) return;
-      statusToast.style.opacity = "0";
+      statusToast.style.setProperty("opacity", "0", "important");
       var oldToast = statusToast;
       statusToastTimer = setTimeout(function () {
         if (oldToast && oldToast.parentNode) oldToast.parentNode.removeChild(oldToast);
         if (statusToast === oldToast) statusToast = null;
         statusToastTimer = null;
       }, 250);
-    }, 2800);
+    }, 3200);
   }
   function makeCard(word, meaning, rect, isLoading, autoSaved, messageType, saveFailed, offlineSuggestion) {
     removeCard();
@@ -174,16 +195,22 @@
     chrome.runtime.sendMessage({ type: "ONLINE_LOOKUP", word: word, source: sourceLanguage, target: targetLanguage }, function (response) {
       if (thisRequest !== requestId || !card) return;
       if (chrome.runtime.lastError) {
-        showOnlineFailure(word, "ارتباط با افزونه یا سرویس ناموفق بود؛ اتصال اینترنت و دسترسی را بررسی کن.", rect); return;
+        showOnlineFailure(word, "ارتباط با افزونه یا سرویس ناموفق بود؛ اتصال اینترنت و دسترسی را بررسی کن.", rect);
+        showStatusToast("دریافت معنی آنلاین ناموفق بود؛ اتصال یا دسترسی سرویس را بررسی کن.", "error");
+        return;
       }
       if (!response || !response.ok) {
-        showOnlineFailure(word, response && response.error ? response.error : "معنی آنلاین پیدا نشد.", rect); return;
+        showOnlineFailure(word, response && response.error ? response.error : "معنی آنلاین پیدا نشد.", rect);
+        showStatusToast("معنی آنلاین دریافت نشد؛ " + (response && response.error ? response.error : "سرویس پاسخ معتبری نداد."), "error");
+        return;
       }
       makeCard(word, response.meaning, rect, false, response.autoSaved === true, "info", response.saveFailed === true);
       if (response.autoSaved === true) {
         showStatusToast("ذخیره شد؛ معنی «" + word + "» به دیکشنری آفلاین اضافه شد.", "success");
       } else if (response.saveFailed === true) {
         showStatusToast("معنی آنلاین دریافت شد، اما ذخیره در دیکشنری آفلاین ناموفق بود.", "error");
+      } else if (response.alreadyOffline === true) {
+        showStatusToast("این واژه از قبل در دیکشنری آفلاین موجود است.", "info");
       }
     });
   }
