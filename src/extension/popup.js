@@ -510,8 +510,8 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!dictionaries[key]) dictionaries[key] = {};
       dictionaries[key][wordToSave] = meaningToSave;
       chrome.storage.local.set({ customDictionaries: dictionaries }, function () {
-        offline[wordToSave] = meaningToSave; offlineLoaded = true;
         if (chrome.runtime.lastError) { var manualSaveError = "ذخیره‌سازی انجام نشد؛ دوباره تلاش کن."; setResult(manualSaveError, "error"); showSaveNotice(manualSaveError, true); return; }
+        offline[wordToSave] = meaningToSave; offlineLoaded = true;
         setResult("＋ ذخیره شد! معنی در دیکشنری آفلاین «" + key + "» ذخیره شد.", "success");
         showSaveNotice("ذخیره‌سازی موفق بود؛ واژه به دیکشنری آفلاین اضافه شد.", false);
         saveWord.disabled = true;
