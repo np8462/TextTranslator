@@ -63,12 +63,15 @@
     if (card && card.parentNode) card.parentNode.removeChild(card);
     card = null;
   }
-  function makeCard(word, meaning, rect, isLoading, autoSaved) {
+  function makeCard(word, meaning, rect, isLoading, autoSaved, messageType) {
     removeCard();
     card = document.createElement("div");
     card.setAttribute("role", "status");
     card.setAttribute("dir", "rtl");
-    card.style.cssText = "position:fixed;z-index:2147483647;max-width:300px;padding:10px 12px;border:1px solid #d2d7de;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.18);background:#fff;color:#202124;font:14px/1.7 Tahoma,Arial,sans-serif;text-align:right;direction:rtl;cursor:default;";
+    card.style.cssText = "position:fixed;z-index:2147483647;max-width:300px;padding:10px 12px;border:1px solid #d2d7de;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.12);background:#fff;color:#202124;font:14px/1.7 Tahoma,Arial,sans-serif;text-align:right;direction:rtl;cursor:default;";
+    if (messageType === "error") { card.style.borderColor = "#e6aaa5"; card.style.background = "#fff7f6"; }
+    else if (messageType === "warning") { card.style.borderColor = "#e8d19a"; card.style.background = "#fffaf0"; }
+    else if (messageType === "success") { card.style.borderColor = "#b7d9c0"; card.style.background = "#f6fbf7"; }
     var title = document.createElement("div");
     title.textContent = word;
     title.style.cssText = "font-weight:bold;color:#1769aa;margin-bottom:3px;direction:auto;text-align:left;";
@@ -101,19 +104,20 @@
     var normalized = word.toLowerCase();
     var thisRequest = ++requestId;
     if (dictionaryMode === "offline") {
-      makeCard(word, dictionary[normalized] || "این واژه در دیکشنری آفلاین این جفت‌زبان نیست. می‌توانی آن را در پنجرهٔ افزونه جست‌وجو و ذخیره کنی.", rect, false);
+      var offlineMeaning = dictionary[normalized];
+      makeCard(word, offlineMeaning || "این واژه در دیکشنری آفلاین این جفت‌زبان نیست. می‌توانی آن را در پنجرهٔ افزونه جست‌وجو و ذخیره کنی.", rect, false, false, offlineMeaning ? "success" : "warning");
       return;
     }
     makeCard(word, "در حال جست‌وجوی آنلاین...", rect, true);
     chrome.runtime.sendMessage({ type: "ONLINE_LOOKUP", word: word, source: sourceLanguage, target: targetLanguage }, function (response) {
       if (thisRequest !== requestId || !card) return;
       if (chrome.runtime.lastError) {
-        makeCard(word, "خطای ارتباط آنلاین؛ اتصال اینترنت و دسترسی سرویس را بررسی کن.", rect, false); return;
+        makeCard(word, "خطای ارتباط آنلاین؛ اتصال اینترنت و دسترسی سرویس را بررسی کن.", rect, false, false, "error"); return;
       }
       if (!response || !response.ok) {
-        makeCard(word, response && response.error ? response.error : "معنی آنلاین پیدا نشد.", rect, false); return;
+        makeCard(word, response && response.error ? response.error : "معنی آنلاین پیدا نشد.", rect, false, false, "error"); return;
       }
-      makeCard(word, response.meaning, rect, false, response.autoSaved === true);
+      makeCard(word, response.meaning, rect, false, response.autoSaved === true, "info");
     });
   }
   function lookupSelection() {
