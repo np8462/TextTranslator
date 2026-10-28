@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "TextTranslator",
-  "version": "0.7.3",
-  "description": "Multilingual dictionary with multi-file import/export including ZIP backup, quality checks, incremental offline updates, and online highlighted-word lookup.",
+  "version": "0.7.4",
+  "description": "Multilingual dictionary with automatic pair-specific offline saving of successful online meanings, plus import/export and dictionary updates.",
   "permissions": [
     "storage"
   ],
