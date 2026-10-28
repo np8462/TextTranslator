@@ -5,35 +5,6 @@ function cacheKey(source, target, word) {
   return source + "|" + target + "|" + String(word || "").toLowerCase();
 }
 
-function sendOfflineFallback(message, reason, sendResponse) {
-  var source = message.source || "en";
-  var target = message.target || "fa";
-  var pair = source + "-" + target;
-  var word = String(message.word || "").toLowerCase();
-  chrome.storage.local.get({ customDictionaries: {}, updatedDictionaries: {} }, function (saved) {
-    var custom = (saved.customDictionaries || {})[pair] || {};
-    var customMeaning = custom[word];
-    if (typeof customMeaning === "string" && customMeaning) {
-      sendResponse({ ok: true, word: message.word, meaning: customMeaning, offlineFallback: true });
-      return;
-    }
-    fetch(chrome.runtime.getURL("dictionaries/" + pair + ".json")).then(function (response) {
-      if (!response.ok) throw new Error("pair dictionary not found");
-      return response.json();
-    }).then(function (dict) {
-      var updated = (saved.updatedDictionaries || {})[pair] || {};
-      var meaning = Object.prototype.hasOwnProperty.call(updated, word) ? updated[word] : (dict && dict[word]);
-      if (typeof meaning === "string" && meaning) {
-        sendResponse({ ok: true, word: message.word, meaning: meaning, offlineFallback: true });
-      } else {
-        sendResponse({ ok: false, error: reason || "معنی آنلاین در دسترس نیست و این واژه در دیکشنری آفلاین این جفت‌زبان هم وجود ندارد." });
-      }
-    }).catch(function () {
-      sendResponse({ ok: false, error: reason || "سرویس آنلاین در دسترس نیست و فایل دیکشنری آفلاین بارگذاری نشد." });
-    });
-  });
-}
-
 function respondWithOnlineMeaning(message, meaning, extras, sendResponse) {
   var source = message.source || "en";
   var target = message.target || "fa";
@@ -104,8 +75,8 @@ function trySecondaryOnline(message, reason, sendResponse) {
   }).catch(function (secondaryError) {
     var combined = reason + " سرویس جایگزین هم موفق نشد؛ " +
       (secondaryError && secondaryError.message ? secondaryError.message : "خطای نامشخص") +
-      ". دیکشنری آفلاین بررسی می‌شود.";
-    sendOfflineFallback(message, combined, sendResponse);
+      ". چون حالت آنلاین فعال است، معنی آفلاین جایگزین نمی‌شود.";
+    sendResponse({ ok: false, error: combined });
   });
 }
 
@@ -149,7 +120,7 @@ function performLookup(message, sendResponse) {
       if (!meaning && data && data.responseData) meaning = data.responseData.translatedText || "";
       if (!meaning && data) meaning = data.meaning || data.translation || data.translatedText || "";
       if (typeof meaning !== "string" || !meaning.trim()) {
-        sendOfflineFallback(message, "پاسخ سرویس آنلاین معنی قابل‌خواندن نداشت؛ دیکشنری آفلاین بررسی شد.", sendResponse);
+        sendResponse({ ok: false, error: "پاسخ سرویس آنلاین معنی قابل‌خواندن نداشت؛ در حالت آنلاین از معنی آفلاین استفاده نمی‌شود." });
         return;
       }
       meaning = meaning.trim();
