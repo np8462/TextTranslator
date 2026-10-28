@@ -63,7 +63,7 @@
     if (card && card.parentNode) card.parentNode.removeChild(card);
     card = null;
   }
-  function makeCard(word, meaning, rect, isLoading) {
+  function makeCard(word, meaning, rect, isLoading, autoSaved) {
     removeCard();
     card = document.createElement("div");
     card.setAttribute("role", "status");
@@ -76,6 +76,12 @@
     text.textContent = meaning;
     if (isLoading) text.style.color = "#5f6368";
     card.appendChild(title); card.appendChild(text);
+    if (autoSaved) {
+      var savedNotice = document.createElement("div");
+      savedNotice.textContent = "ذخیره شد؛ این واژه به دیکشنری آفلاین همین جفت‌زبان اضافه شد.";
+      savedNotice.style.cssText = "margin-top:7px;padding:5px 7px;border-radius:5px;background:#e6f4ea;color:#137333;font-size:12px;border:1px solid #b7dfc4;";
+      card.appendChild(savedNotice);
+    }
     card.addEventListener("mouseenter", function () { if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; } });
     card.addEventListener("mouseleave", function () { hideTimer = setTimeout(removeCard, 350); });
     document.documentElement.appendChild(card);
@@ -107,7 +113,7 @@
       if (!response || !response.ok) {
         makeCard(word, response && response.error ? response.error : "معنی آنلاین پیدا نشد.", rect, false); return;
       }
-      makeCard(word, response.meaning, rect, false);
+      makeCard(word, response.meaning, rect, false, response.autoSaved === true);
     });
   }
   function lookupSelection() {
