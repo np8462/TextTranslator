@@ -34,6 +34,50 @@ function sendOfflineFallback(message, reason, sendResponse) {
   });
 }
 
+function respondWithOnlineMeaning(message, meaning, extras, sendResponse) {
+  var source = message.source || "en";
+  var target = message.target || "fa";
+  var pair = source + "-" + target;
+  var word = String(message.word || "").trim();
+  var normalized = word.toLowerCase();
+
+  function hasWord(entries) {
+    var keys = Object.keys(entries || {});
+    for (var i = 0; i < keys.length; i++) {
+      if (keys[i].toLowerCase() === normalized && typeof entries[keys[i]] === "string" && entries[keys[i]].trim()) return true;
+    }
+    return false;
+  }
+  function finish(autoSaved, alreadyOffline, saveFailed) {
+    var response = { ok: true, word: word, meaning: meaning, autoSaved: autoSaved, alreadyOffline: alreadyOffline };
+    Object.keys(extras || {}).forEach(function (key) { response[key] = extras[key]; });
+    if (saveFailed) response.saveFailed = true;
+    sendResponse(response);
+  }
+
+  fetch(chrome.runtime.getURL("dictionaries/" + pair + ".json")).then(function (response) {
+    if (!response.ok) return {};
+    return response.json();
+  }).catch(function () { return {}; }).then(function (seeded) {
+    chrome.storage.local.get({ customDictionaries: {}, customDictionary: {}, updatedDictionaries: {} }, function (saved) {
+      var allCustom = saved.customDictionaries || {};
+      var pairCustom = allCustom[pair] || {};
+      var pairUpdated = (saved.updatedDictionaries || {})[pair] || {};
+      var legacy = pair === "en-fa" ? (saved.customDictionary || {}) : {};
+      if (hasWord(seeded) || hasWord(pairUpdated) || hasWord(pairCustom) || hasWord(legacy)) {
+        finish(false, true, false);
+        return;
+      }
+      if (!allCustom[pair]) allCustom[pair] = {};
+      allCustom[pair][normalized] = meaning;
+      chrome.storage.local.set({ customDictionaries: allCustom }, function () {
+        if (chrome.runtime.lastError) finish(false, false, true);
+        else finish(true, false, false);
+      });
+    });
+  });
+}
+
 function trySecondaryOnline(message, reason, sendResponse) {
   var source = message.source || "en";
   var target = message.target || "fa";
@@ -56,7 +100,7 @@ function trySecondaryOnline(message, reason, sendResponse) {
       cache[key] = { meaning: meaning, expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000 };
       chrome.storage.local.set({ onlineMeaningCache: cache });
     });
-    sendResponse({ ok: true, word: word, meaning: meaning, provider: "mymemory", fallbackProvider: true });
+    respondWithOnlineMeaning(message, meaning, { provider: "mymemory", fallbackProvider: true }, sendResponse);
   }).catch(function (secondaryError) {
     var combined = reason + " سرویس جایگزین هم موفق نشد؛ " +
       (secondaryError && secondaryError.message ? secondaryError.message : "خطای نامشخص") +
@@ -73,7 +117,7 @@ function performLookup(message, sendResponse) {
   chrome.storage.local.get({ onlineDictionaryUrl: DEFAULT_DICTIONARY_URL, onlineMeaningCache: {}, onlineCooldownUntil: 0 }, function (settings) {
     var cached = settings.onlineMeaningCache[key];
     if (cached && cached.meaning && cached.expiresAt > Date.now()) {
-      sendResponse({ ok: true, word: word, meaning: cached.meaning, cached: true });
+      respondWithOnlineMeaning(message, cached.meaning, { cached: true }, sendResponse);
       return;
     }
     if (settings.onlineCooldownUntil > Date.now()) {
@@ -113,7 +157,7 @@ function performLookup(message, sendResponse) {
       var cache = settings.onlineMeaningCache || {};
       cache[key] = { meaning: meaning, expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000 };
       chrome.storage.local.set({ onlineMeaningCache: cache, onlineCooldownUntil: 0 });
-      sendResponse({ ok: true, word: word, meaning: meaning });
+      respondWithOnlineMeaning(message, meaning, {}, sendResponse);
     }).catch(function (error) {
       if (error && error.status === 429) {
         chrome.storage.local.set({ onlineCooldownUntil: Date.now() + 60 * 1000 });
