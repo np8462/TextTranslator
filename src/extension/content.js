@@ -8,6 +8,8 @@
   var card = null;
   var hideTimer = null;
   var cardTimer = null;
+  var statusToast = null;
+  var statusToastTimer = null;
   var displayDurationSeconds = 2;
   var requestId = 0;
   var dictionary = {};
@@ -67,6 +69,41 @@
     if (cardTimer) { clearTimeout(cardTimer); cardTimer = null; }
     if (card && card.parentNode) card.parentNode.removeChild(card);
     card = null;
+  }
+
+  function showStatusToast(message, type) {
+    if (statusToastTimer) { clearTimeout(statusToastTimer); statusToastTimer = null; }
+    if (statusToast && statusToast.parentNode) statusToast.parentNode.removeChild(statusToast);
+    statusToast = document.createElement("div");
+    statusToast.setAttribute("role", "status");
+    statusToast.setAttribute("aria-live", "polite");
+    statusToast.setAttribute("dir", "rtl");
+    statusToast.textContent = message;
+    statusToast.style.cssText = "position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:2147483647;max-width:calc(100vw - 32px);box-sizing:border-box;padding:10px 16px;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.2);font:14px/1.7 Tahoma,Arial,sans-serif;text-align:center;direction:rtl;opacity:1;transition:opacity .2s ease;";
+    if (type === "success") {
+      statusToast.style.background = "#e6f4ea";
+      statusToast.style.border = "1px solid #81c995";
+      statusToast.style.color = "#176b35";
+    } else if (type === "error") {
+      statusToast.style.background = "#fce8e6";
+      statusToast.style.border = "1px solid #e6aaa5";
+      statusToast.style.color = "#a12622";
+    } else {
+      statusToast.style.background = "#fff4ce";
+      statusToast.style.border = "1px solid #e8d19a";
+      statusToast.style.color = "#795900";
+    }
+    document.documentElement.appendChild(statusToast);
+    statusToastTimer = setTimeout(function () {
+      if (!statusToast) return;
+      statusToast.style.opacity = "0";
+      var oldToast = statusToast;
+      statusToastTimer = setTimeout(function () {
+        if (oldToast && oldToast.parentNode) oldToast.parentNode.removeChild(oldToast);
+        if (statusToast === oldToast) statusToast = null;
+        statusToastTimer = null;
+      }, 250);
+    }, 2800);
   }
   function makeCard(word, meaning, rect, isLoading, autoSaved, messageType, saveFailed, offlineSuggestion) {
     removeCard();
@@ -143,6 +180,11 @@
         showOnlineFailure(word, response && response.error ? response.error : "معنی آنلاین پیدا نشد.", rect); return;
       }
       makeCard(word, response.meaning, rect, false, response.autoSaved === true, "info", response.saveFailed === true);
+      if (response.autoSaved === true) {
+        showStatusToast("ذخیره شد؛ معنی «" + word + "» به دیکشنری آفلاین اضافه شد.", "success");
+      } else if (response.saveFailed === true) {
+        showStatusToast("معنی آنلاین دریافت شد، اما ذخیره در دیکشنری آفلاین ناموفق بود.", "error");
+      }
     });
   }
   function lookupSelection() {
