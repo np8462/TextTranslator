@@ -22,3 +22,10 @@ ol { padding-right: 22px; line-height: 1.8; font-size: 12px; }
 
 .save-notice { margin: 7px 0; padding: 8px 9px; border: 1px solid #b7dfc4; border-radius: 6px; background: #e6f4ea; color: #137333; font-size: 12px; }
 .save-notice.error { border-color: #f1b8b5; background: #fce8e6; color: #b3261e; }
+
+/* Quiet, accessible status colors for success, errors, warnings, and progress. */
+#result.success { border: 1px solid #c7dfce; background: #f1f8f3; color: #24643b; }
+#result.error { border: 1px solid #e7c0bd; background: #fff5f4; color: #9f2922; }
+#result.warning { border: 1px solid #ead9ad; background: #fffaf0; color: #795d20; }
+#result.info { border: 1px solid #d3e1ee; background: #f3f7fb; color: #345b7d; }
+.save-notice { box-shadow: 0 1px 3px rgba(0,0,0,.04); }
