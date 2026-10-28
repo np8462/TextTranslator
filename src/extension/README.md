@@ -19,7 +19,7 @@
 - The default online endpoint is \`https://translate.googleapis.com/translate_a/single?client=gtx&sl={source}&tl={target}&dt=t&q={word}\`.
 - This endpoint is a public, unofficial Google Translate interface; it is not a documented, guaranteed Google Cloud Translation API and may change or stop working.
 - The official Google Cloud Translation API requires Google Cloud configuration/authentication and may incur charges.
-- After an online lookup, the **＋** button saves that word and meaning in Chrome local storage under the currently selected language pair. Successful online results are cached locally for seven days; when the service returns HTTP 429, repeated calls are paused for one minute and the extension tries the pair's offline dictionary. The popup does not list dictionary contents. Tooltip duration can be set manually from 1 to 60 seconds (default 2 seconds). Hovering the same word again after the tooltip closes should trigger another lookup.
+- In online mode, a successful meaning from the online provider (including the seven-day online-result cache) is automatically saved to the matching personal offline dictionary only if the word is not already present in the bundled starter dictionary, downloaded updates, or personal entries. A brief green confirmation appears only when a new entry is saved. Existing offline entries are never overwritten by this automatic save. Offline mode checks only the selected pair and does not request an online meaning when the word is absent. The **＋** button remains available for manual saving when needed. Successful online results are cached locally for seven days; when the service returns HTTP 429, repeated calls are paused for one minute and the extension tries the pair's offline dictionary. The popup does not list dictionary contents. Tooltip duration can be set manually from 1 to 60 seconds (default 2 seconds). Hovering the same word again after the tooltip closes should trigger another lookup.
 - No build step or third-party package is required. Uses Manifest V3.
 
 ## Install locally
@@ -31,7 +31,7 @@
 5. If already installed, press Reload on the extension card and refresh open webpages.
 6. Choose the source and target languages, then click **اعمال زبان‌ها**.
 7. Select online or offline mode and search a word, or hover over a single word or select it on a webpage.
-8. After an online meaning appears, click **＋** in the popup to save it for offline use in the same language pair.
+8. In online mode, a successful result is automatically saved to the matching offline pair if missing. In offline mode, the extension does not query the online service.
 
 ## Dictionary updates and release notes
 
