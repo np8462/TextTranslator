@@ -193,20 +193,30 @@
     }
     makeCard(word, "در حال جست‌وجوی آنلاین...", rect, true);
     chrome.runtime.sendMessage({ type: "ONLINE_LOOKUP", word: word, source: sourceLanguage, target: targetLanguage }, function (response) {
-      if (thisRequest !== requestId || !card) return;
+      if (thisRequest !== requestId) return;
+
+      // The page tooltip may disappear while the network request is running.
+      // Keep status feedback independent from the tooltip's lifetime.
+      var tooltipStillActive = !!card;
       if (chrome.runtime.lastError) {
-        showOnlineFailure(word, "ارتباط با افزونه یا سرویس ناموفق بود؛ اتصال اینترنت و دسترسی را بررسی کن.", rect);
+        if (tooltipStillActive) showOnlineFailure(word, "ارتباط با افزونه یا سرویس ناموفق بود؛ اتصال اینترنت و دسترسی را بررسی کن.", rect);
         showStatusToast("دریافت معنی آنلاین ناموفق بود؛ اتصال یا دسترسی سرویس را بررسی کن.", "error");
         return;
       }
       if (!response || !response.ok) {
-        showOnlineFailure(word, response && response.error ? response.error : "معنی آنلاین پیدا نشد.", rect);
+        if (tooltipStillActive) showOnlineFailure(word, response && response.error ? response.error : "معنی آنلاین پیدا نشد.", rect);
         showStatusToast("معنی آنلاین دریافت نشد؛ " + (response && response.error ? response.error : "سرویس پاسخ معتبری نداد."), "error");
         return;
       }
-      makeCard(word, response.meaning, rect, false, response.autoSaved === true, "info", response.saveFailed === true);
+
+      if (tooltipStillActive) {
+        makeCard(word, response.meaning, rect, false, response.autoSaved === true, "info", response.saveFailed === true);
+      }
       if (response.autoSaved === true) {
-        showStatusToast("ذخیره شد؛ معنی «" + word + "» به دیکشنری آفلاین اضافه شد.", "success");
+        // Let the loading tooltip finish updating before showing the independent toast.
+        setTimeout(function () {
+          if (thisRequest === requestId) showStatusToast("ذخیره شد؛ معنی «" + word + "» به دیکشنری آفلاین اضافه شد.", "success");
+        }, 180);
       } else if (response.saveFailed === true) {
         showStatusToast("معنی آنلاین دریافت شد، اما ذخیره در دیکشنری آفلاین ناموفق بود.", "error");
       } else if (response.alreadyOffline === true) {
