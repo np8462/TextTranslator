@@ -12,6 +12,8 @@ document.addEventListener("DOMContentLoaded", function () {
   var wordInput = document.getElementById("word");
   var lookup = document.getElementById("lookup");
   var result = document.getElementById("result");
+  var saveNotice = document.getElementById("save-notice");
+  var saveNoticeTimer = null;
   var saveWord = document.getElementById("save-word");
   var endpoint = document.getElementById("endpoint");
   var saveEndpoint = document.getElementById("save-endpoint");
@@ -109,6 +111,22 @@ document.addEventListener("DOMContentLoaded", function () {
     result.textContent = (source === "online" ? "معنی آنلاین: " : "معنی آفلاین: ") + meaning;
     saveWord.disabled = source !== "online";
   }
+  function showSaveNotice(message, isError) {
+    if (!saveNotice) return;
+    if (saveNoticeTimer) window.clearTimeout(saveNoticeTimer);
+    saveNotice.textContent = message;
+    saveNotice.className = isError ? "save-notice error" : "save-notice";
+    saveNotice.hidden = false;
+    saveNoticeTimer = window.setTimeout(function () {
+      saveNotice.hidden = true;
+      saveNoticeTimer = null;
+    }, 2500);
+  }
+  function hideSaveNotice() {
+    if (saveNoticeTimer) window.clearTimeout(saveNoticeTimer);
+    saveNoticeTimer = null;
+    if (saveNotice) saveNotice.hidden = true;
+  }
   function lookupOfflineWord(word) {
     if (!offlineLoaded) {
       result.textContent = "واژه‌نامهٔ آفلاین در حال بارگذاری است؛ یک لحظه دیگر امتحان کن.";
@@ -138,11 +156,18 @@ document.addEventListener("DOMContentLoaded", function () {
           if (chrome.runtime.lastError) { result.textContent = "خطا در ارتباط با افزونهٔ پس‌زمینه: " + chrome.runtime.lastError.message; return; }
           if (!response || !response.ok) { result.textContent = response && response.error ? response.error : "معنی آنلاین پیدا نشد."; return; }
           showMeaning(word, response.meaning, response.offlineFallback ? "offline" : "online");
+          if (response.autoSaved === true) {
+            saveWord.disabled = true;
+            showSaveNotice("ذخیرهٔ خودکار موفق؛ معنی به دیکشنری آفلاین «" + sourceLanguage + " ← " + targetLanguage + "» اضافه شد.", false);
+          } else if (response.saveFailed === true) {
+            showSaveNotice("معنی آنلاین دریافت شد، اما ذخیره‌سازی آفلاین ناموفق بود.", true);
+          }
         });
       });
     });
   }
   function runLookup() {
+    hideSaveNotice();
     var word = validWord();
     if (!word) return;
     if (dictionaryMode === "online") lookupOnlineWord(word);
@@ -471,6 +496,7 @@ document.addEventListener("DOMContentLoaded", function () {
   lookup.addEventListener("click", runLookup);
   wordInput.addEventListener("keydown", function (event) { if (event.key === "Enter") runLookup(); });
   saveWord.addEventListener("click", function () {
+    hideSaveNotice();
     if (!currentWord || !currentMeaning) return;
     var wordToSave = currentWord.toLowerCase(), meaningToSave = currentMeaning, key = pairKey();
     chrome.storage.local.get({ customDictionaries: {} }, function (data) {
