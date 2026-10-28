@@ -19,3 +19,6 @@ input, select { width: 100%; box-sizing: border-box; margin-top: 5px; padding: 8
 .add-word span { font-size: 18px; margin-left: 4px; }
 .note { color: #5f6368; font-size: 11px; }
 ol { padding-right: 22px; line-height: 1.8; font-size: 12px; }
+
+.save-notice { margin: 7px 0; padding: 8px 9px; border: 1px solid #b7dfc4; border-radius: 6px; background: #e6f4ea; color: #137333; font-size: 12px; }
+.save-notice.error { border-color: #f1b8b5; background: #fce8e6; color: #b3261e; }
