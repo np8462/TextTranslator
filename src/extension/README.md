@@ -1,6 +1,6 @@
 # TextTranslator Chrome Extension
 
-**Status:** Local prototype, version 0.7.3. Changes are limited to the test branch; this is not a published Chrome Web Store release.
+**Status:** Local prototype, version 0.7.4. Changes are limited to the test branch; this is not a published Chrome Web Store release.
 
 این افزونه می‌تواند هنگام بردن ماوس روی یک واژه یا انتخاب آن در صفحه، معنی آن را در یک کارت کوچک نشان دهد. حالت آنلاین/آفلاین و جفت‌زبان انتخاب‌شده در پنجرهٔ افزونه برای کلمات هایلایت‌شده نیز اعمال می‌شود.
 
@@ -19,7 +19,7 @@
 - The default online endpoint is \`https://translate.googleapis.com/translate_a/single?client=gtx&sl={source}&tl={target}&dt=t&q={word}\`.
 - This endpoint is a public, unofficial Google Translate interface; it is not a documented, guaranteed Google Cloud Translation API and may change or stop working.
 - The official Google Cloud Translation API requires Google Cloud configuration/authentication and may incur charges.
-- In online mode, a successful meaning from the online provider (including the seven-day online-result cache) is automatically saved to the matching personal offline dictionary only if the word is not already present in the bundled starter dictionary, downloaded updates, or personal entries. A brief green confirmation appears only when a new entry is saved. Existing offline entries are never overwritten by this automatic save. Offline mode checks only the selected pair and does not request an online meaning when the word is absent. The **＋** button remains available for manual saving when needed. Successful online results are cached locally for seven days; when the service returns HTTP 429, repeated calls are paused for one minute and the extension tries the pair's offline dictionary. The popup does not list dictionary contents. Tooltip duration can be set manually from 1 to 60 seconds (default 2 seconds). Hovering the same word again after the tooltip closes should trigger another lookup.
+- In online mode, a successful meaning from the online provider (including the seven-day online-result cache) is automatically saved to the matching personal offline dictionary only if the word is not already present in the bundled starter dictionary, downloaded updates, or personal entries. A brief green confirmation appears only when a new entry is saved. Existing offline entries are never overwritten by this automatic save. Offline mode checks only the selected pair and does not request an online meaning when the word is absent. The **＋** button remains available for manual saving when needed. Successful online results are cached locally for seven days; when the service returns HTTP 429, repeated calls are paused for one minute and MyMemory is tried as a secondary online source. If both online sources fail, an error is shown instead of substituting an offline meaning. The popup does not list dictionary contents. Tooltip duration can be set manually from 1 to 60 seconds (default 2 seconds). Hovering the same word again after the tooltip closes should trigger another lookup.
 - No build step or third-party package is required. Uses Manifest V3.
 
 ## Install locally
@@ -75,3 +75,12 @@
 - The ZIP contains one JSON file for each of the 22 supported language pairs plus a README. Each JSON preserves language-pair metadata and merges bundled starter words, downloaded updates, and personal custom entries.
 - The ZIP is generated locally in the popup without a third-party library. Extract it and select all JSON files together in the multi-file Import control to restore them.
 - ZIP creation is implemented with stored (uncompressed) entries for compatibility; real Chrome 109 download and re-import testing is still required.
+
+
+## Version 0.7.4 test notes
+
+- In online mode, the extension uses an online result (or its seven-day cache) even if the word already exists in the offline dictionary. It checks the matching pair across bundled starter words, downloaded updates, and personal entries.
+- If the word is absent and an online meaning is successfully received, the meaning is automatically saved to that pair's personal dictionary. Existing offline entries are not overwritten, and no success notice appears for an existing word.
+- Popup lookup and page tooltips display a short green save confirmation only after a successful save. A failed online lookup does not silently switch to an offline meaning while online mode is selected.
+- Offline mode remains local-only: when a word is absent, it reports that it is missing and does not request an online translation.
+- Static syntax and manifest checks passed; real Chrome 109 interaction testing is still required.
