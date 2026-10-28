@@ -193,7 +193,14 @@
     }
     makeCard(word, "در حال جست‌وجوی آنلاین...", rect, true);
     chrome.runtime.sendMessage({ type: "ONLINE_LOOKUP", word: word, source: sourceLanguage, target: targetLanguage }, function (response) {
-      if (thisRequest !== requestId) return;
+      // A newer hover/selection can invalidate this tooltip request, but it must not
+      // suppress a success notice for a translation that was actually saved.
+      if (thisRequest !== requestId) {
+        if (response && response.ok && response.autoSaved === true) {
+          showStatusToast("ذخیره شد؛ معنی «" + word + "» به دیکشنری آفلاین اضافه شد.", "success");
+        }
+        return;
+      }
 
       // The page tooltip may disappear while the network request is running.
       // Keep status feedback independent from the tooltip's lifetime.
