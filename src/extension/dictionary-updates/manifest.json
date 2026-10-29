@@ -1,12 +1,12 @@
 {
   "format": "texttranslator-dictionary-updates",
   "version": 1,
-  "description": "English-Persian dictionary additions; source attribution and quality notes should be reviewed before broad release.",
+  "description": "Partial English-Persian dataset based on VahidN/EnglishToPersianDictionaries generic-7; meanings need quality review.",
   "pairs": {
     "en-fa": {
-      "version": 2,
+      "version": 3,
       "file": "en-fa.json",
-      "count": 16847
+      "count": 43329
     },
     "fa-en": {
       "version": 1,
