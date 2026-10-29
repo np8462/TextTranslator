@@ -1,12 +1,12 @@
 {
   "format": "texttranslator-dictionary-updates",
   "version": 1,
-  "description": "Small reviewed dictionary updates. Updates are merged locally and never replace user-saved entries.",
+  "description": "English-Persian dictionary additions; source attribution and quality notes should be reviewed before broad release.",
   "pairs": {
     "en-fa": {
-      "version": 1,
+      "version": 2,
       "file": "en-fa.json",
-      "count": 20
+      "count": 16847
     },
     "fa-en": {
       "version": 1,
