@@ -1,7 +1,7 @@
 {
   "format": "texttranslator-dictionary-updates",
-  "version": 1,
-  "description": "Partial English-Persian dataset based on VahidN/EnglishToPersianDictionaries generic-7; meanings need quality review.",
+  "version": 2,
+  "description": "Persian-English reverse index generated from the English-Persian dictionary; values are English headword candidates and may require semantic review.",
   "pairs": {
     "en-fa": {
       "version": 3,
@@ -9,9 +9,9 @@
       "count": 43329
     },
     "fa-en": {
-      "version": 1,
+      "version": 2,
       "file": "fa-en.json",
-      "count": 20
+      "count": 28140
     }
   }
 }
