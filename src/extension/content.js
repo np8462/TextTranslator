@@ -28,18 +28,23 @@
     Object.keys(saved).forEach(function (key) { if (typeof saved[key] === "string") dictionary[key.toLowerCase()] = saved[key]; });
   }
   function loadPairDictionary() {
-    var key = pairKey();
-    fetch(chrome.runtime.getURL("dictionaries/" + key + ".json")).then(function (response) {
-      if (!response.ok) throw new Error("pair dictionary not found");
-      return response.json();
-    }).then(function (data) {
-      if (pairKey() !== key) return;
-      seedDictionaries = {};
-      seedDictionaries[key] = data || {};
-      rebuildDictionary();
-    }).catch(function () {
-      if (pairKey() !== key) return;
-      seedDictionaries = {};
+    var activeKey = pairKey();
+    var keysToLoad = ["en-fa", "fa-en"];
+    if (keysToLoad.indexOf(activeKey) < 0) keysToLoad.push(activeKey);
+
+    Promise.all(keysToLoad.map(function (key) {
+      return fetch(chrome.runtime.getURL("dictionaries/" + key + ".json")).then(function (response) {
+        if (!response.ok) throw new Error("pair dictionary not found");
+        return response.json();
+      }).catch(function () {
+        return {};
+      }).then(function (data) {
+        return { key: key, data: data || {} };
+      });
+    })).then(function (loaded) {
+      loaded.forEach(function (item) {
+        seedDictionaries[item.key] = item.data;
+      });
       rebuildDictionary();
     });
   }
