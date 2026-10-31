@@ -1,65 +1,48 @@
-# TextTranslator
+# TextTranslator — Firefox Add-on
 
-A lightweight multilingual browser extension with online lookup and separate offline dictionaries for each language pair.
+**Firefox-only package · Version 0.7.5 · Test build**
 
-## Browser extension
+This branch is dedicated to the Firefox extension. Its repository root is the extension package root: `manifest.json` is located directly beside `background.js`, `content.js`, `popup.html`, and the resource folders. Create the upload ZIP from the contents of this branch's root; do not ZIP the containing repository folder.
 
-The extension source is in [src/extension/](src/extension/). It is being prepared for Chrome 109+ and Chromium-based browsers.
+## Compatibility
 
-### Highlights
+- Manifest V3.
+- Firefox 128.0 or later (declared in `browser_specific_settings.gecko.strict_min_version`).
+- Uses the Firefox-compatible Manifest V3 background script declaration (`background.scripts`), not Chromium's `background.service_worker`.
+- The extension code uses the `chrome.*` compatibility namespace supported by Firefox WebExtensions.
 
-- Translate a word on hover or selected text on a webpage.
-- Switch between online lookup and pair-specific offline dictionaries.
-- Save and manage personal words locally.
-- Import, validate, and export dictionary JSON files.
-- No ads, analytics, or tracking.
+## Features
 
-### Install the development build
+- Hover and text-selection translation.
+- Online and offline modes.
+- Separate language-pair dictionaries, including English ↔ Persian.
+- Local personal dictionary entries, import, export, and update support.
+- Adjustable hover tooltip duration.
 
-1. Download or clone this repository and extract it.
-2. Open chrome://extensions in Chrome.
-3. Enable Developer mode.
-4. Select Load unpacked and choose src/extension.
-5. Reload the extension and refresh webpages already open.
+## Build / upload to Mozilla Add-ons
 
-See the [extension guide](src/extension/README.md) for details.
+1. Download this branch as a ZIP, or clone the branch.
+2. If downloaded from GitHub, extract it first.
+3. Select all files and folders *inside this branch root* and ZIP those items together.
+4. Confirm that opening the ZIP shows `manifest.json` immediately at the top level (not inside another directory).
+5. Upload that ZIP to Mozilla Add-ons for validation.
 
-## Privacy
+The ZIP should contain entries such as:
+```
+manifest.json
+background.js
+content.js
+popup.html
+popup.js
+styles.css
+dictionaries/
+icons/
+```
 
-Read the bilingual [Privacy Policy](PRIVACY.md). Online lookup sends the submitted word or phrase and language pair to the selected translation provider. Offline lookup stays on the device.
+## Permissions and privacy
 
-## Support the project
+The extension needs storage for settings and local dictionaries. It runs a content script on webpages so hover and selection translation can work. Online translation and dictionary updates contact the configured external services. Only the submitted word or selected phrase and language pair are sent for online translation. Review the project's privacy policy before publishing.
 
-TextTranslator is free to use and has no ads. Optional support is welcome; see [DONATE.md](DONATE.md). A suggested contribution is **US$1**, but any support is voluntary.
+## Important testing note
 
----
-
-# فارسی
-
-TextTranslator افزونه‌ای سبک برای ترجمه و جست‌وجوی معنی واژه‌ها با دیکشنری‌های آفلاین مستقل برای هر جفت‌زبان است.
-
-## امکانات
-
-- نمایش معنی واژه با حرکت ماوس یا انتخاب متن در صفحات وب.
-- انتخاب ترجمهٔ آنلاین یا دیکشنری آفلاین.
-- ذخیره و مدیریت واژه‌های شخصی در حافظهٔ محلی مرورگر.
-- ورود، بررسی کیفیت و خروجی گرفتن از فایل‌های JSON دیکشنری.
-- بدون تبلیغات، تحلیل رفتار یا ردیابی کاربران.
-
-## نصب نسخهٔ آزمایشی
-
-۱. مخزن را دریافت و از حالت فشرده خارج کنید.
-۲. در Chrome آدرس chrome://extensions را باز کنید.
-۳. گزینهٔ Developer mode را روشن کنید.
-۴. روی Load unpacked بزنید و پوشهٔ src/extension را انتخاب کنید.
-۵. افزونه را Reload کنید و صفحه‌های وب باز را Refresh کنید.
-
-راهنمای کامل‌تر در [راهنمای افزونه](src/extension/README.md) قرار دارد.
-
-## حریم خصوصی
-
-[سیاست حریم خصوصی دوزبانه](PRIVACY.md) را بخوانید. در حالت آنلاین، واژه یا عبارت ارسالی و جفت‌زبان به سرویس ترجمهٔ انتخاب‌شده فرستاده می‌شود؛ جست‌وجوی آفلاین روی دستگاه انجام می‌شود.
-
-## حمایت از پروژه
-
-TextTranslator رایگان و بدون تبلیغات است. حمایت مالی کاملاً اختیاری است؛ جزئیات در [DONATE.md](DONATE.md) قرار دارد. مبلغ پیشنهادی **۱ دلار آمریکا** است، اما هر میزان حمایت اختیاری خواهد بود.
+This is a Firefox-specific packaging branch, not a claim that the add-on has already passed Mozilla validation or has been tested in every Firefox version. Test installation, hover, selection, online lookup, offline lookup, dictionary import/export, and update behavior in Firefox before submitting a public release.
