@@ -2,75 +2,30 @@
 <html lang="fa" dir="rtl">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>TextTranslator</title><link rel="stylesheet" href="styles.css"></head>
 <body><main>
-<h1>TextTranslator</h1>
-<p id="status" role="status">در حال بررسی وضعیت...</p>
-<button id="toggle" type="button">...</button>
+<header class="app-header"><img src="icons/icon-48.png" width="38" height="38" alt="" aria-hidden="true"><div><h1>TextTranslator</h1><p class="tagline">دیکشنری چندزبانه؛ آنلاین و آفلاین</p></div></header>
+<p id="status" role="status">در حال بررسی وضعیت...</p><button id="toggle" type="button">...</button>
 <section class="panel">
 <h2>تنظیم زبان و حالت</h2>
 <label for="source-language">زبان مبدأ (زبان واژه)</label>
-<select id="source-language">
-<option value="en">انگلیسی</option><option value="de">آلمانی</option><option value="fr">فرانسوی</option><option value="es">اسپانیایی</option><option value="it">ایتالیایی</option><option value="el">یونانی</option><option value="tr">ترکی</option><option value="ar">عربی</option><option value="ru">روسی</option><option value="ja">ژاپنی</option><option value="zh-CN">چینی ساده‌شده</option><option value="fa">فارسی</option>
-</select>
+<select id="source-language"><option value="en">انگلیسی</option><option value="de">آلمانی</option><option value="fr">فرانسوی</option><option value="es">اسپانیایی</option><option value="it">ایتالیایی</option><option value="el">یونانی</option><option value="tr">ترکی</option><option value="ar">عربی</option><option value="ru">روسی</option><option value="ja">ژاپنی</option><option value="zh-CN">چینی ساده‌شده</option><option value="fa">فارسی</option></select>
 <label for="target-language">زبان مقصد (معنی)</label>
-<select id="target-language">
-<option value="fa">فارسی</option><option value="en">انگلیسی</option><option value="de">آلمانی</option><option value="fr">فرانسوی</option><option value="es">اسپانیایی</option><option value="it">ایتالیایی</option><option value="el">یونانی</option><option value="tr">ترکی</option><option value="ar">عربی</option><option value="ru">روسی</option><option value="ja">ژاپنی</option><option value="zh-CN">چینی ساده‌شده</option>
-</select>
-<button id="save-languages" type="button">اعمال زبان‌ها</button>
-<p id="language-help" class="note">هر جفت‌زبان دیکشنری مستقل دارد؛ برای زبان‌های اصلی به فارسی و فارسی به آن زبان، واژه‌های اولیه هم اضافه شده‌اند.</p>
-<label for="display-duration">مدت نمایش معنی هنگام hover</label>
-<input id="display-duration" type="number" min="1" max="60" step="1" value="2" inputmode="numeric">
-<p class="note">مدت را به ثانیه دستی وارد کن؛ از ۱ تا ۶۰ ثانیه. مقدار پیش‌فرض ۲ ثانیه است.</p>
-<div class="trigger-settings">
-<label><input id="translate-on-selection" type="checkbox" checked> ترجمه با انتخاب متن (واژه یا عبارت)</label>
-<label><input id="translate-on-hover" type="checkbox" checked> ترجمه با حرکت ماوس روی واژه</label>
-<p class="note">هر روش را مستقل روشن یا خاموش کن؛ با خاموش کردن هر دو، این دو روش ترجمه را شروع نمی‌کنند.</p>
-</div>
-<button id="mode-toggle" type="button" aria-pressed="true">حالت دیکشنری: آنلاین</button>
-<p id="mode-help">حالت انتخاب‌شده هم در این پنجره و هم هنگام هایلایت کلمات استفاده می‌شود.</p>
-<label for="word">واژه برای جست‌وجو</label>
-<input id="word" type="text" maxlength="80" placeholder="مثلاً: apple یا take care" dir="auto">
-<button id="lookup" type="button">پیدا کردن معنی</button>
-<p id="result" role="status">یک واژه یا عبارت وارد کن و «پیدا کردن معنی» را بزن.</p>
-<p id="offline-suggestion" class="offline-suggestion" role="status" aria-live="polite" hidden></p>
-<p id="save-notice" class="save-notice" role="status" aria-live="polite" hidden></p>
-<button id="save-word" class="add-word" type="button" disabled><span aria-hidden="true">＋</span> افزودن معنی به دیکشنری آفلاین همین جفت‌زبان</button>
-<p class="note">ذخیره فقط پس از دریافت معنی آنلاین فعال می‌شود. واژه‌ها در حافظهٔ محلی همین مرورگر Chrome و جداگانه برای هر جفت‌زبان نگهداری می‌شوند؛ داخل فایل‌های GitHub ذخیره نمی‌شوند.</p>
-
+<select id="target-language"><option value="fa">فارسی</option><option value="en">انگلیسی</option><option value="de">آلمانی</option><option value="fr">فرانسوی</option><option value="es">اسپانیایی</option><option value="it">ایتالیایی</option><option value="el">یونانی</option><option value="tr">ترکی</option><option value="ar">عربی</option><option value="ru">روسی</option><option value="ja">ژاپنی</option><option value="zh-CN">چینی ساده‌شده</option></select>
+<button id="save-languages" type="button">اعمال زبان‌ها</button><p id="language-help" class="note">هر جفت‌زبان دیکشنری مستقل دارد؛ برای زبان‌های اصلی به فارسی و فارسی به آن زبان، واژه‌های اولیه هم اضافه شده‌اند.</p>
+<label for="display-duration">مدت نمایش معنی هنگام hover</label><input id="display-duration" type="number" min="1" max="60" step="1" value="2" inputmode="numeric"><p class="note">مدت را به ثانیه وارد کن؛ از ۱ تا ۶۰ ثانیه. مقدار پیش‌فرض ۲ ثانیه است.</p>
+<div class="trigger-settings"><label><input id="translate-on-selection" type="checkbox" checked> ترجمه با انتخاب متن (واژه یا عبارت)</label><label><input id="translate-on-hover" type="checkbox" checked> ترجمه با حرکت ماوس روی واژه</label><p class="note">هر روش را مستقل روشن یا خاموش کن؛ با خاموش کردن هر دو، این دو روش ترجمه را شروع نمی‌کنند.</p></div>
+<button id="mode-toggle" type="button" aria-pressed="true">حالت دیکشنری: آنلاین</button><p id="mode-help">حالت انتخاب‌شده هم در این پنجره و هم هنگام هایلایت کلمات استفاده می‌شود.</p>
+<label for="word">واژه برای جست‌وجو</label><input id="word" type="text" maxlength="80" placeholder="مثلاً: apple یا take care" dir="auto"><button id="lookup" type="button">پیدا کردن معنی</button>
+<p id="result" role="status">یک واژه یا عبارت وارد کن و «پیدا کردن معنی» را بزن.</p><p id="offline-suggestion" class="offline-suggestion" role="status" aria-live="polite" hidden></p><p id="save-notice" class="save-notice" role="status" aria-live="polite" hidden></p>
+<button id="save-word" class="add-word" type="button" disabled><span aria-hidden="true">＋</span> افزودن معنی به دیکشنری آفلاین همین جفت‌زبان</button><p class="note">ذخیره فقط پس از دریافت معنی آنلاین فعال می‌شود. واژه‌ها در حافظهٔ محلی همین مرورگر Chrome و جداگانه برای هر جفت‌زبان نگهداری می‌شوند؛ داخل فایل‌های GitHub ذخیره نمی‌شوند.</p>
 </section>
-<section class="panel">
-<h2>مدیریت دیکشنری</h2>
-<p class="note">برای Import می‌توانی یک یا چند فایل JSON را هم‌زمان انتخاب کنی. جفت‌زبان از فرادادهٔ فایل یا نامی مانند en-fa.json تشخیص داده می‌شود؛ اگر مشخص نباشد، آن فایل وارد نمی‌شود تا واژه‌ها در دیکشنری اشتباه قرار نگیرند.</p>
+<section class="panel"><h2>مدیریت دیکشنری</h2><p class="note">برای Import می‌توانی یک یا چند فایل JSON را هم‌زمان انتخاب کنی. جفت‌زبان از فرادادهٔ فایل یا نامی مانند en-fa.json تشخیص داده می‌شود؛ اگر مشخص نباشد، آن فایل وارد نمی‌شود تا واژه‌ها در دیکشنری اشتباه قرار نگیرند.</p>
 <label for="export-pair">دیکشنری برای خروجی گرفتن</label>
 <select id="export-pair">
-<option value="__all_zip__">همهٔ دیکشنری‌ها — خروجی ZIP یکجا</option>
-<option value="en-fa">انگلیسی ← فارسی (en-fa)</option><option value="fa-en">فارسی ← انگلیسی (fa-en)</option>
-<option value="de-fa">آلمانی ← فارسی (de-fa)</option><option value="fa-de">فارسی ← آلمانی (fa-de)</option>
-<option value="fr-fa">فرانسوی ← فارسی (fr-fa)</option><option value="fa-fr">فارسی ← فرانسوی (fa-fr)</option>
-<option value="es-fa">اسپانیایی ← فارسی (es-fa)</option><option value="fa-es">فارسی ← اسپانیایی (fa-es)</option>
-<option value="it-fa">ایتالیایی ← فارسی (it-fa)</option><option value="fa-it">فارسی ← ایتالیایی (fa-it)</option>
-<option value="el-fa">یونانی ← فارسی (el-fa)</option><option value="fa-el">فارسی ← یونانی (fa-el)</option>
-<option value="tr-fa">ترکی ← فارسی (tr-fa)</option><option value="fa-tr">فارسی ← ترکی (fa-tr)</option>
-<option value="ar-fa">عربی ← فارسی (ar-fa)</option><option value="fa-ar">فارسی ← عربی (fa-ar)</option>
-<option value="ru-fa">روسی ← فارسی (ru-fa)</option><option value="fa-ru">فارسی ← روسی (fa-ru)</option>
-<option value="ja-fa">ژاپنی ← فارسی (ja-fa)</option><option value="fa-ja">فارسی ← ژاپنی (fa-ja)</option>
-<option value="zh-CN-fa">چینی ساده‌شده ← فارسی (zh-CN-fa)</option><option value="fa-zh-CN">فارسی ← چینی ساده‌شده (fa-zh-CN)</option>
-</select>
-<button id="export-dictionary" type="button">خروجی دیکشنری انتخاب‌شده / همه در ZIP</button>
-<label for="import-file">انتخاب یک یا چند فایل JSON برای Import یا بررسی کیفیت</label>
-<input id="import-file" type="file" accept=".json,application/json" multiple>
-<button id="import-dictionary" type="button">Import و ادغام/به‌روزرسانی فایل‌های انتخاب‌شده</button>
-<button id="check-dictionary" type="button">بررسی کیفیت فایل‌های انتخاب‌شده</button>
-<button id="update-dictionary" type="button">بررسی و دریافت همهٔ به‌روزرسانی‌های موجود</button>
-<p id="dictionary-tools-result" role="status" aria-live="polite">هنوز عملیاتی انجام نشده است.</p>
-<p class="note">اگر واژه‌ای در فایل واردشده با واژهٔ موجود هم‌نام باشد، معنی فایل واردشده جایگزین معنی قبلی همان دیکشنری می‌شود. انتخاب یک جفت‌زبان، فایل JSON همان دیکشنری را می‌سازد؛ انتخاب «همهٔ دیکشنری‌ها» یک فایل ZIP شامل JSON جداگانه برای هر جفت‌زبان می‌سازد. محل ذخیره را تنظیمات دانلود Chrome تعیین می‌کند. به‌روزرسانی آنلاین، همهٔ جفت‌زبان‌هایی را بررسی می‌کند که در فهرست مخزن بسته دارند.</p>
-</section>
-<section class="panel">
-<h2>تنظیم دیکشنری آنلاین</h2>
-<label for="endpoint">آدرس سرویس (باید {word}، {source} و {target} را پشتیبانی کند)</label>
-<input id="endpoint" type="text" dir="ltr">
-<button id="save-endpoint" type="button">ذخیرهٔ آدرس آنلاین</button>
-<p class="note">آدرس پیش‌فرض از رابط عمومی و غیررسمی ترجمهٔ گوگل استفاده می‌کند؛ تضمین پایداری یا پشتیبانی رسمی ندارد. API رسمی Google Cloud Translation نیازمند تنظیمات و احتمالاً هزینه است.</p>
-</section>
-<section class="help"><h2>راهنمای استفاده</h2>
-<ol><li>زبان مبدأ و مقصد را انتخاب و «اعمال زبان‌ها» را بزن.</li><li>حالت آنلاین یا آفلاین را انتخاب کن؛ همین حالت برای کلمات هایلایت‌شده نیز استفاده می‌شود.</li><li>در حالت آنلاین، معنی از سرویس آنلاین گرفته می‌شود؛ اگر واژه در دیکشنری آفلاین همان جفت‌زبان نباشد، پس از دریافت موفق به‌طور خودکار ذخیره می‌شود و پیام سبز کوتاهی نمایش داده می‌شود.</li><li>در حالت آفلاین، فقط دیکشنری همان جفت‌زبان بررسی می‌شود؛ اگر واژه موجود نباشد، درخواست آنلاین انجام نمی‌شود.</li></ol></section>
+<option value="__all_zip__">همهٔ دیکشنری‌ها — خروجی ZIP یکجا</option><option value="en-fa">انگلیسی ← فارسی (en-fa)</option><option value="fa-en">فارسی ← انگلیسی (fa-en)</option>
+<option value="de-fa">آلمانی ← فارسی (de-fa)</option><option value="fa-de">فارسی ← آلمانی (fa-de)</option><option value="fr-fa">فرانسوی ← فارسی (fr-fa)</option><option value="fa-fr">فارسی ← فرانسوی (fa-fr)</option><option value="es-fa">اسپانیایی ← فارسی (es-fa)</option><option value="fa-es">فارسی ← اسپانیایی (fa-es)</option><option value="it-fa">ایتالیایی ← فارسی (it-fa)</option><option value="fa-it">فارسی ← ایتالیایی (fa-it)</option><option value="el-fa">یونانی ← فارسی (el-fa)</option><option value="fa-el">فارسی ← یونانی (fa-el)</option><option value="tr-fa">ترکی ← فارسی (tr-fa)</option><option value="fa-tr">فارسی ← ترکی (fa-tr)</option><option value="ar-fa">عربی ← فارسی (ar-fa)</option><option value="fa-ar">فارسی ← عربی (fa-ar)</option><option value="ru-fa">روسی ← فارسی (ru-fa)</option><option value="fa-ru">فارسی ← روسی (fa-ru)</option><option value="ja-fa">ژاپنی ← فارسی (ja-fa)</option><option value="fa-ja">فارسی ← ژاپنی (fa-ja)</option><option value="zh-CN-fa">چینی ساده‌شده ← فارسی (zh-CN-fa)</option><option value="fa-zh-CN">فارسی ← چینی ساده‌شده (fa-zh-CN)</option></select>
+<button id="export-dictionary" type="button">خروجی دیکشنری انتخاب‌شده / همه در ZIP</button><label for="import-file">انتخاب یک یا چند فایل JSON برای Import یا بررسی کیفیت</label><input id="import-file" type="file" accept=".json,application/json" multiple><button id="import-dictionary" type="button">Import و ادغام/به‌روزرسانی فایل‌های انتخاب‌شده</button><button id="check-dictionary" type="button">بررسی کیفیت فایل‌های انتخاب‌شده</button><button id="update-dictionary" type="button">بررسی و دریافت همهٔ به‌روزرسانی‌های موجود</button><p id="dictionary-tools-result" role="status" aria-live="polite">هنوز عملیاتی انجام نشده است.</p><p class="note">اگر واژه‌ای در فایل واردشده با واژهٔ موجود هم‌نام باشد، معنی فایل واردشده جایگزین معنی قبلی همان دیکشنری می‌شود. انتخاب یک جفت‌زبان، فایل JSON همان دیکشنری را می‌سازد؛ انتخاب «همهٔ دیکشنری‌ها» یک فایل ZIP شامل JSON جداگانه برای هر جفت‌زبان می‌سازد. محل ذخیره را تنظیمات دانلود Chrome تعیین می‌کند. به‌روزرسانی آنلاین، همهٔ جفت‌زبان‌هایی را بررسی می‌کند که در فهرست مخزن بسته دارند.</p></section>
+<section class="panel"><h2>تنظیم دیکشنری آنلاین</h2><label for="endpoint">آدرس سرویس (باید {word}، {source} و {target} را پشتیبانی کند)</label><input id="endpoint" type="text" dir="ltr"><button id="save-endpoint" type="button">ذخیرهٔ آدرس آنلاین</button><p class="note">آدرس پیش‌فرض از رابط عمومی و غیررسمی ترجمهٔ گوگل استفاده می‌کند؛ تضمین پایداری یا پشتیبانی رسمی ندارد. API رسمی Google Cloud Translation نیازمند تنظیمات و احتمالاً هزینه است.</p></section>
+<section class="support-panel" aria-labelledby="support-title"><div class="support-heading"><span class="support-icon" aria-hidden="true">♥</span><div><h2 id="support-title">حمایت از توسعه‌دهنده</h2><p>اگر TextTranslator برایت مفید بوده، می‌توانی با یک انعام کوچک به ادامهٔ توسعه کمک کنی.</p></div></div><p class="support-amount">پیشنهاد ما: <strong>۱ دلار</strong> <span>· کاملاً اختیاری</span></p><a class="support-link" href="https://github.com/np8462/TextTranslator/blob/test/release-preparation/DONATE.md" target="_blank" rel="noopener noreferrer">مشاهدهٔ روش حمایت <span aria-hidden="true">↗</span></a><p class="note">افزونه رایگان می‌ماند؛ حمایت مالی هیچ قابلیتی را قفل نمی‌کند.</p></section>
+<details class="help panel"><summary><span aria-hidden="true">📘</span> راهنمای سریع استفاده</summary><ol><li>زبان مبدأ و مقصد را انتخاب و «اعمال زبان‌ها» را بزن.</li><li>حالت آنلاین یا آفلاین را انتخاب؛ این حالت برای کلمات هایلایت‌شده در صفحات وب هم استفاده می‌شود.</li><li>برای دیدن معنی، روی یک واژه در صفحه حرکت کن یا آن را انتخاب کن؛ هر روش را می‌توانی جداگانه خاموش کنی.</li><li>در حالت آفلاین فقط دیکشنری همان جفت‌زبان بررسی می‌شود. اگر واژه موجود نباشد، ترجمهٔ آنلاین انجام نمی‌شود.</li><li>در حالت آنلاین، معنی از سرویس اینترنتی دریافت می‌شود و در صورت موفقیت، اگر در دیکشنری نباشد به‌طور خودکار ذخیره می‌شود.</li><li>برای افزودن دستی معنی، واژه را در پنجرهٔ افزونه جست‌وجو کن و دکمهٔ «افزودن معنی به دیکشنری آفلاین» را بزن.</li><li>از بخش «مدیریت دیکشنری» می‌توانی فایل‌های JSON را وارد، بررسی یا صادر کنی.</li><li>مدت نمایش معنی را از ۱ تا ۶۰ ثانیه تنظیم کن.</li></ol><p class="note">ترجمهٔ آنلاین به اینترنت و سرویس‌های بیرونی وابسته است. دیکشنری‌های ذخیره‌شدهٔ محلی بدون اینترنت نیز قابل استفاده‌اند.</p><a class="privacy-link" href="https://github.com/np8462/TextTranslator/blob/test/release-preparation/PRIVACY.md" target="_blank" rel="noopener noreferrer">حریم خصوصی و نحوهٔ استفاده از داده‌ها</a></details>
+<footer>TextTranslator · رایگان، بدون تبلیغات و با حمایت کاملاً اختیاری</footer>
 </main><script src="popup.js"></script></body></html>
