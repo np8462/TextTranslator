@@ -1,0 +1,40 @@
+name: Build Firefox Add-on ZIP
+
+on:
+  push:
+    branches:
+      - firefox/addon-package
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Firefox package
+        uses: actions/checkout@v4
+
+      - name: Build Mozilla upload ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          ZIP="TextTranslator-Firefox-0.7.5.zip"
+          zip -r "$ZIP" \
+            manifest.json background.js content.js popup.html popup.js styles.css \
+            dictionaries icons
+          unzip -Z1 "$ZIP" | grep -Fx "manifest.json"
+          if unzip -Z1 "$ZIP" | grep -Eq '^[^/]+/manifest\.json$'; then
+            echo "Unexpected containing directory in ZIP" >&2
+            exit 1
+          fi
+          unzip -t "$ZIP"
+
+      - name: Upload ZIP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TextTranslator-Firefox-0.7.5
+          path: TextTranslator-Firefox-0.7.5.zip
+          if-no-files-found: error
+          retention-days: 30
